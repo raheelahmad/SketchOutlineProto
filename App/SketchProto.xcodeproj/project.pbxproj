@@ -12,6 +12,11 @@
 		592879F02606F78000FA0AAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 592879EF2606F78000FA0AAC /* Assets.xcassets */; };
 		592879F32606F78000FA0AAC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 592879F22606F78000FA0AAC /* Preview Assets.xcassets */; };
 		59287A04260711C700FA0AAC /* SketchStatusView in Frameworks */ = {isa = PBXBuildFile; productRef = 59287A03260711C700FA0AAC /* SketchStatusView */; };
+		59C21F2A26097A8100511477 /* SketchDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C21F2926097A8100511477 /* SketchDemoApp.swift */; };
+		59C21F2C26097A8100511477 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C21F2B26097A8100511477 /* ContentView.swift */; };
+		59C21F2E26097A8200511477 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59C21F2D26097A8200511477 /* Assets.xcassets */; };
+		59C21F3126097A8200511477 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59C21F3026097A8200511477 /* Preview Assets.xcassets */; };
+		59C21F3926097A8A00511477 /* Sketcher in Frameworks */ = {isa = PBXBuildFile; productRef = 59C21F3826097A8A00511477 /* Sketcher */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -21,6 +26,12 @@
 		592879EF2606F78000FA0AAC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		592879F22606F78000FA0AAC /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		592879F42606F78000FA0AAC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		59C21F2726097A8100511477 /* SketchDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SketchDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		59C21F2926097A8100511477 /* SketchDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SketchDemoApp.swift; sourceTree = "<group>"; };
+		59C21F2B26097A8100511477 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		59C21F2D26097A8200511477 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		59C21F3026097A8200511477 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		59C21F3226097A8200511477 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +43,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		59C21F2426097A8100511477 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				59C21F3926097A8A00511477 /* Sketcher in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -39,6 +58,7 @@
 			isa = PBXGroup;
 			children = (
 				592879EA2606F77E00FA0AAC /* App */,
+				59C21F2826097A8100511477 /* SketchDemo */,
 				592879E92606F77E00FA0AAC /* Products */,
 				592879FE2607010500FA0AAC /* Frameworks */,
 			);
@@ -48,6 +68,7 @@
 			isa = PBXGroup;
 			children = (
 				592879E82606F77E00FA0AAC /* SketchProto.app */,
+				59C21F2726097A8100511477 /* SketchDemo.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,6 +100,26 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		59C21F2826097A8100511477 /* SketchDemo */ = {
+			isa = PBXGroup;
+			children = (
+				59C21F2926097A8100511477 /* SketchDemoApp.swift */,
+				59C21F2B26097A8100511477 /* ContentView.swift */,
+				59C21F2D26097A8200511477 /* Assets.xcassets */,
+				59C21F3226097A8200511477 /* Info.plist */,
+				59C21F2F26097A8200511477 /* Preview Content */,
+			);
+			path = SketchDemo;
+			sourceTree = "<group>";
+		};
+		59C21F2F26097A8200511477 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				59C21F3026097A8200511477 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -102,6 +143,26 @@
 			productReference = 592879E82606F77E00FA0AAC /* SketchProto.app */;
 			productType = "com.apple.product-type.application";
 		};
+		59C21F2626097A8100511477 /* SketchDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 59C21F3526097A8200511477 /* Build configuration list for PBXNativeTarget "SketchDemo" */;
+			buildPhases = (
+				59C21F2326097A8100511477 /* Sources */,
+				59C21F2426097A8100511477 /* Frameworks */,
+				59C21F2526097A8100511477 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SketchDemo;
+			packageProductDependencies = (
+				59C21F3826097A8A00511477 /* Sketcher */,
+			);
+			productName = SketchDemo;
+			productReference = 59C21F2726097A8100511477 /* SketchDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -112,6 +173,9 @@
 				LastUpgradeCheck = 1240;
 				TargetAttributes = {
 					592879E72606F77E00FA0AAC = {
+						CreatedOnToolsVersion = 12.4;
+					};
+					59C21F2626097A8100511477 = {
 						CreatedOnToolsVersion = 12.4;
 					};
 				};
@@ -130,6 +194,7 @@
 			projectRoot = "";
 			targets = (
 				592879E72606F77E00FA0AAC /* SketchProto */,
+				59C21F2626097A8100511477 /* SketchDemo */,
 			);
 		};
 /* End PBXProject section */
@@ -144,6 +209,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		59C21F2526097A8100511477 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				59C21F3126097A8200511477 /* Preview Assets.xcassets in Resources */,
+				59C21F2E26097A8200511477 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -153,6 +227,15 @@
 			files = (
 				592879EE2606F77E00FA0AAC /* ContentView.swift in Sources */,
 				592879EC2606F77E00FA0AAC /* AppApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		59C21F2326097A8100511477 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				59C21F2C26097A8100511477 /* ContentView.swift in Sources */,
+				59C21F2A26097A8100511477 /* SketchDemoApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -317,6 +400,50 @@
 			};
 			name = Release;
 		};
+		59C21F3326097A8200511477 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"SketchDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = 2W72Q4758S;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = SketchDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakunlabs.SketchDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		59C21F3426097A8200511477 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"SketchDemo/Preview Content\"";
+				DEVELOPMENT_TEAM = 2W72Q4758S;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = SketchDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakunlabs.SketchDemo;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -338,12 +465,25 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		59C21F3526097A8200511477 /* Build configuration list for PBXNativeTarget "SketchDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				59C21F3326097A8200511477 /* Debug */,
+				59C21F3426097A8200511477 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		59287A03260711C700FA0AAC /* SketchStatusView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SketchStatusView;
+		};
+		59C21F3826097A8A00511477 /* Sketcher */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Sketcher;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

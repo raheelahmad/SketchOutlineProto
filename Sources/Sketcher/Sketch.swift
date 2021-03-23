@@ -7,14 +7,14 @@
 
 import UIKit
 
-final class Sketcher: UIView {
+public final class Sketcher: UIView {
     var points: [CGPoint] = []
 
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         points.removeAll()
     }
 
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         switch touches.count {
         case 0:
             return
@@ -29,9 +29,11 @@ final class Sketcher: UIView {
             }
             points.append(closestTouched ?? touchedPoints[0])
         }
+
+        setNeedsDisplay()
     }
 
-    override func draw(_ rect: CGRect) {
+    public override func draw(_ rect: CGRect) {
         guard !points.isEmpty else { return }
 
         let path = UIBezierPath()
