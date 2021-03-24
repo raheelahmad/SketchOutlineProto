@@ -30,7 +30,6 @@ public final class Sketcher: UIView {
     var currentLine = Line(id: Date().description, points: []) {
         didSet {
             tangentSlider.maximumValue = Float(currentLine.points.count)
-            print(tangentSlider.maximumValue)
         }
     }
 
@@ -141,9 +140,30 @@ public final class Sketcher: UIView {
                 let isSelectedForTangent = line.id == currentLine.id && tangentSliderIndex == idx
                 let size: CGFloat = isSelectedForTangent ? 8 : 4
                 context?.fillEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
-            }
 
+            }
         }
+
+        if let index = tangentSliderIndex {
+            drawTangent(pointIndex: index, line: currentLine, ctx: context)
+        }
+    }
+
+    private func drawTangent(pointIndex: Int, line: Line, ctx: CGContext?) {
+        let point = line.points[pointIndex]
+
+        let path = UIBezierPath()
+        for (idx, offset) in (-120..<120).enumerated() {
+            let tPt = CGPoint(x: point.x + CGFloat(offset), y: point.y)
+            if idx == 0 {
+                path.move(to: tPt)
+            } else {
+                path.addLine(to: tPt)
+            }
+        }
+
+        ctx?.addPath(path.cgPath)
+        ctx?.strokePath()
     }
 }
 
