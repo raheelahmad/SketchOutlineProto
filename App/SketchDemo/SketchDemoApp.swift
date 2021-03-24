@@ -8,20 +8,18 @@
 import SwiftUI
 import Sketcher
 
-struct SketchDemoView: UIViewRepresentable {
-    func makeUIView(context: Context) -> some UIView {
-        Sketcher(frame: .zero)
-    }
-
-    func updateUIView(_ uiView: UIViewType, context: Context) {
-    }
-}
-
 @main
 struct SketchDemoApp: App {
     var body: some Scene {
         WindowGroup {
             SketchDemoView()
         }
+    }
+}
+
+
+struct SketchView_Previews: PreviewProvider {
+    static var previews: some View {
+        SketchDemoView()
     }
 }
