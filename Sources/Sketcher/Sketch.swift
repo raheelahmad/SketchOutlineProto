@@ -151,10 +151,15 @@ public final class Sketcher: UIView {
 
     private func drawTangent(pointIndex: Int, line: Line, ctx: CGContext?) {
         let point = line.points[pointIndex]
+        let aIdx = max(0, pointIndex - 3)
+        let bIdx = min(line.points.count - 1, pointIndex + 3)
+        let a = line.points[aIdx]
+        let b = line.points[bIdx]
+        let m = (a.y - b.y)/(a.x - b.y)
 
         let path = UIBezierPath()
         for (idx, offset) in (-120..<120).enumerated() {
-            let tPt = CGPoint(x: point.x + CGFloat(offset), y: point.y)
+            let tPt = CGPoint(x: point.x + CGFloat(offset), y: point.x * m)
             if idx == 0 {
                 path.move(to: tPt)
             } else {
