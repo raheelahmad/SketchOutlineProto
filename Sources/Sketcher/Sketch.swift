@@ -21,8 +21,17 @@ public struct SketchDemoView: UIViewRepresentable {
 }
 
 struct Line {
+    struct PointSlope {
+        let index: Int
+        let slope: CGFloat
+    }
+
     let id: String
-    var points: [CGPoint]
+    var points: [CGPoint] {
+        didSet { calculateSlopes() }
+    }
+
+    var slopes: [PointSlope] = []
 }
 
 public final class Sketcher: UIView {
@@ -111,6 +120,8 @@ public final class Sketcher: UIView {
 
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         setNeedsDisplay()
+        print(currentLine.length)
+        currentLine.calculateSlopes()
     }
 
     public override func draw(_ rect: CGRect) {
@@ -138,8 +149,15 @@ public final class Sketcher: UIView {
 
             for (idx, point) in linePoints.enumerated() {
                 let isSelectedForTangent = line.id == currentLine.id && tangentSliderIndex == idx
-                let size: CGFloat = isSelectedForTangent ? 8 : 4
-                context?.fillEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
+                let isUsedForAngleCalculations = line.id == currentLine.id && line.slopes.contains(where: { $0.index == idx })
+                let isMega = isSelectedForTangent || isUsedForAngleCalculations
+                let size: CGFloat = isMega ? 4 : 1
+
+                if isMega {
+                    context?.strokeEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
+                } else {
+                    context?.fillEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
+                }
 
             }
         }
@@ -147,19 +165,60 @@ public final class Sketcher: UIView {
         if let index = tangentSliderIndex {
             drawTangent(pointIndex: index, line: currentLine, ctx: context)
         }
+
+        addAngleTexts()
+    }
+
+    private func addAngleTexts() {
+//        for texts =
+        for layer in layer.sublayers!.filter({ $0 is CATextLayer }) {
+            layer.removeFromSuperlayer()
+        }
+
+        let fm = NumberFormatter()
+        fm.maximumFractionDigits = 1
+
+        for (idx, slope) in currentLine.slopes.enumerated() {
+            let slopeTextLayer = CATextLayer()
+            let currentSlope = atan(Double(slope.slope))
+            let slopeText = fm.string(from: NSNumber(value: currentSlope))!
+            slopeTextLayer.string = slopeText
+            slopeTextLayer.font = UIFont.systemFont(ofSize: 12, weight: .thin)
+            slopeTextLayer.fontSize = 10
+            layer.addSublayer(slopeTextLayer)
+            let position = currentLine.points[slope.index]
+            slopeTextLayer.frame = .init(x: position.x - 20 , y: position.y - 10, width: 30, height: 20)
+
+            if idx > 0 {
+                let diffTextLayer = CATextLayer()
+                let previousSlope = atan(Double(currentLine.slopes[idx - 1].slope))
+                let diff = abs(currentSlope - previousSlope)
+                let diffThreshold = 1.0
+                if diff < diffThreshold {
+                    continue
+                }
+
+                let deltaSlopeText = fm.string(from: NSNumber(value: diff))!
+                let diffText = "  [\(fm.string(from: NSNumber(value: currentSlope))!) • \(fm.string(from: NSNumber(value: previousSlope))!)]"
+                diffTextLayer.string = deltaSlopeText + diffText
+                diffTextLayer.font = UIFont.systemFont(ofSize: 12, weight: .bold)
+                diffTextLayer.fontSize = 10
+                layer.addSublayer(diffTextLayer)
+                let position = currentLine.points[slope.index]
+                diffTextLayer.frame = .init(x: position.x + 20, y: position.y-10, width: 90, height: 20)
+            }
+        }
     }
 
     private func drawTangent(pointIndex: Int, line: Line, ctx: CGContext?) {
         let point = line.points[pointIndex]
-        let aIdx = max(0, pointIndex - 3)
-        let bIdx = min(line.points.count - 1, pointIndex + 3)
-        let a = line.points[aIdx]
-        let b = line.points[bIdx]
-        let m = (a.y - b.y)/(a.x - b.y)
+        let m = line.tangent(at: pointIndex)
 
         let path = UIBezierPath()
         for (idx, offset) in (-120..<120).enumerated() {
-            let tPt = CGPoint(x: point.x + CGFloat(offset), y: point.x * m)
+            let offsetX = CGFloat(offset)
+            let offsetY = offsetX * m
+            let tPt = CGPoint(x: point.x + offsetX, y: point.y + offsetY)
             if idx == 0 {
                 path.move(to: tPt)
             } else {
@@ -169,6 +228,67 @@ public final class Sketcher: UIView {
 
         ctx?.addPath(path.cgPath)
         ctx?.strokePath()
+    }
+}
+
+extension Line {
+    func tangent(at index: Int) -> CGFloat {
+        let slopeDist = 10
+        let aIdx = max(0, index - slopeDist)
+        let bIdx = min(points.count - 1, index + slopeDist)
+        let a = points[aIdx]
+        let b = points[bIdx]
+        let m = a.x == b.x ? 1.0 : (a.y - b.y)/(a.x - b.x)
+
+        return m
+    }
+
+    var length: CGFloat {
+        guard points.count > 1 else { return 0 }
+        return points.dropFirst()
+            .enumerated()
+            .reduce(0) { (accum, value) -> CGFloat in
+                let idx = value.offset
+                let point = value.element
+                let previousPoint = points[idx]
+                return accum + point.distance(to: previousPoint)
+            }
+    }
+
+    mutating func calculateSlopes() {
+        guard points.count > 3 else { return }
+
+        let minWalkDist: CGFloat = 20
+        var dist: CGFloat = 0
+        var currentIndex = 0
+
+        var slopes: [PointSlope] = []
+
+        let fm = NumberFormatter()
+        fm.maximumFractionDigits = 3
+        func f(_ m: CGFloat) -> String {
+            fm.string(from: NSNumber(value: Double(m)))!
+        }
+        print("----------------")
+        while currentIndex < points.count - 2 {
+            currentIndex += 1
+            dist += points[currentIndex].distance(to: points[currentIndex-1])
+            if dist >= minWalkDist {
+                let index = currentIndex
+                let a = points[index - 1]
+                let b = points[index + 1]
+                let dx = b.x > a.x ? (b.x - a.x) : (a.x - b.x)
+                let dy = b.x > a.x ? (b.y - a.y) : (a.y - b.y)
+                if abs(dx) <= 0.5 && !slopes.isEmpty { continue }
+                let m = -dy / dx
+                print("\(f(b.x))\t\(f(b.y)) \t\t \(f(a.x))\t\(f(a.y))  \t\t\t\t \(f(m)) \(f(atan(m)))")
+                slopes.append(PointSlope(index: currentIndex, slope: m))
+                dist = 0
+            }
+        }
+        print("===============")
+
+        self.slopes = slopes
     }
 }
 
