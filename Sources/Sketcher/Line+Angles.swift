@@ -29,21 +29,12 @@ extension Line {
         for (idx, point) in pts.enumerated() {
             let prev = points[idx]
             let next = points[idx+2]
-            // p3 → next
-            // p2 → prev
-            // p1 → point
-            let result = atan2(next.y - point.y, next.x - point.x) -
+            let angle = atan2(next.y - point.y, next.x - point.x) -
                 atan2(prev.y - point.y, prev.x - point.x)
-//            let result = atan((next.y - point.y)/(next.x - point.x)) -
-//                atan((prev.y - point.y)/(prev.x - point.y))
 
-            angles.append(PointAngle(index: idx+1, angle: result))
+            angles.append(PointAngle(index: idx+1, angle: angle))
         }
         self.angles = angles
-        print("Angles::\n")
-        for angle in angles {
-            print(angle.debugDescription)
-        }
     }
 }
 

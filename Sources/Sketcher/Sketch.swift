@@ -135,9 +135,9 @@ public final class Sketcher: UIView {
         setNeedsDisplay()
         currentLine.resample(atLength: 20)
         currentLine.calculateSlopes()
-        currentLine.recognized = currentLine.figureOutShape()
 
         currentLine.calculateAngles()
+        print("Is rect: \(currentLine.boundingRect != nil)")
     }
 
     public override func draw(_ rect: CGRect) {
@@ -165,6 +165,11 @@ public final class Sketcher: UIView {
             }
 
             line.draw(with: context)
+        }
+
+        if let boundingRect = currentLine.boundingRect {
+            context?.setStrokeColor(UIColor.yellow.cgColor)
+            context?.stroke(boundingRect)
         }
 
     }

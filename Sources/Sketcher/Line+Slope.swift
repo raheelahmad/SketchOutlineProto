@@ -63,24 +63,6 @@ extension Line {
 
         self.slopes = slopes
     }
-    func figureOutShape() -> [CGPoint] {
-        //        let angles = slopes.map { atan($0.slope) }
-        let nf = NumberFormatter()
-        nf.maximumFractionDigits = 3
-        var points: [CGPoint] = [self.points[slopes.first!.index]]
-        for (lastPoint, currentPoint) in zip(slopes.dropLast(), slopes.dropFirst()) {
-            let last = atan(lastPoint.slope)
-            let current = atan(currentPoint.slope)
-            let diff = abs(current) - abs(last)
-            if abs(diff) > 0.6 {
-                let dir = current > last ? "+" : "-"
-                print(dir + "\t\(nf.string(for: currentPoint.slope)) → \(nf.string(for: lastPoint.slope))")
-                points.append(self.points[currentPoint.index])
-            }
-        }
-        points.append(self.points.last!)
-        return points
-    }
 }
 
 extension NumberFormatter {

@@ -29,6 +29,5 @@ struct Line {
 
     var slopes: [PointSlope] = []
     var angles: [PointAngle] = []
-    var recognized: [CGPoint] = []
 }
 
