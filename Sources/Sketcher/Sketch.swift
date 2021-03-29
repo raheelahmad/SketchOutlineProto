@@ -20,20 +20,6 @@ public struct SketchDemoView: UIViewRepresentable {
     }
 }
 
-struct Line {
-    struct PointSlope {
-        let index: Int
-        let slope: CGFloat
-    }
-
-    let id: String
-    var points: [CGPoint] {
-        didSet { calculateSlopes() }
-    }
-
-    var slopes: [PointSlope] = []
-}
-
 public final class Sketcher: UIView {
     var lines: [Line] = []
     var currentLine = Line(id: Date().description, points: []) {
@@ -43,6 +29,11 @@ public final class Sketcher: UIView {
     }
 
     let tangentSlider = UISlider()
+    let angleLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 22)
+        return label
+    }()
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -72,10 +63,21 @@ public final class Sketcher: UIView {
             tangentSlider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             tangentSlider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 20)
         ])
+        angleLabel.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(angleLabel)
+        NSLayoutConstraint.activate([
+            angleLabel.centerXAnchor.constraint(equalTo: centerXAnchor, constant: 0),
+            angleLabel.topAnchor.constraint(equalTo: tangentSlider.bottomAnchor, constant: 20)
+        ])
     }
 
     private var tangentSliderIndex: Int? {
-        didSet { setNeedsDisplay() }
+        didSet {
+            setNeedsDisplay()
+            if tangentSliderIndex != oldValue {
+                updateAngle()
+            }
+        }
     }
 
     @objc
@@ -88,6 +90,17 @@ public final class Sketcher: UIView {
     private func tangentSliderEnded() {
         tangentSliderIndex = nil
         tangentSlider.value = 0
+    }
+
+    func updateAngle() {
+        guard let index = tangentSliderIndex else {
+            return
+        }
+        guard let angle = currentLine.angles.first(where: { $0.index == index }) else { return }
+        angleLabel.text = String(format: "%.2f", angle.angle)
+        if angle.isMajorTurn {
+            print(String(format: "Major turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
+        }
     }
 
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -120,8 +133,11 @@ public final class Sketcher: UIView {
 
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         setNeedsDisplay()
-        print(currentLine.length)
+        currentLine.resample(atLength: 20)
         currentLine.calculateSlopes()
+        currentLine.recognized = currentLine.figureOutShape()
+
+        currentLine.calculateAngles()
     }
 
     public override func draw(_ rect: CGRect) {
@@ -133,24 +149,12 @@ public final class Sketcher: UIView {
 
             let linePoints = line.points
             guard !linePoints.isEmpty else { continue }
-            let path = UIBezierPath()
-            path.move(to: linePoints[0])
-
-            for point in linePoints.dropFirst() {
-                path.addLine(to: point)
-            }
-
-            context?.addPath(path.cgPath)
-            context?.setStrokeColor(UIColor.red.cgColor)
-            context?.strokePath()
-
 
             context?.setFillColor(UIColor.red.cgColor)
 
             for (idx, point) in linePoints.enumerated() {
                 let isSelectedForTangent = line.id == currentLine.id && tangentSliderIndex == idx
-                let isUsedForAngleCalculations = line.id == currentLine.id && line.slopes.contains(where: { $0.index == idx })
-                let isMega = isSelectedForTangent || isUsedForAngleCalculations
+                let isMega = isSelectedForTangent
                 let size: CGFloat = isMega ? 4 : 1
 
                 if isMega {
@@ -158,19 +162,14 @@ public final class Sketcher: UIView {
                 } else {
                     context?.fillEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
                 }
-
             }
+
+            line.draw(with: context)
         }
 
-        if let index = tangentSliderIndex {
-            drawTangent(pointIndex: index, line: currentLine, ctx: context)
-        }
-
-        addAngleTexts()
     }
 
-    private func addAngleTexts() {
-//        for texts =
+    func addAngleTexts() {
         for layer in layer.sublayers!.filter({ $0 is CATextLayer }) {
             layer.removeFromSuperlayer()
         }
@@ -192,8 +191,8 @@ public final class Sketcher: UIView {
             if idx > 0 {
                 let diffTextLayer = CATextLayer()
                 let previousSlope = atan(Double(currentLine.slopes[idx - 1].slope))
-                let diff = abs(currentSlope - previousSlope)
-                let diffThreshold = 1.0
+                let diff = abs(abs(currentSlope) - abs(previousSlope))
+                let diffThreshold = 0.6
                 if diff < diffThreshold {
                     continue
                 }
@@ -228,67 +227,6 @@ public final class Sketcher: UIView {
 
         ctx?.addPath(path.cgPath)
         ctx?.strokePath()
-    }
-}
-
-extension Line {
-    func tangent(at index: Int) -> CGFloat {
-        let slopeDist = 10
-        let aIdx = max(0, index - slopeDist)
-        let bIdx = min(points.count - 1, index + slopeDist)
-        let a = points[aIdx]
-        let b = points[bIdx]
-        let m = a.x == b.x ? 1.0 : (a.y - b.y)/(a.x - b.x)
-
-        return m
-    }
-
-    var length: CGFloat {
-        guard points.count > 1 else { return 0 }
-        return points.dropFirst()
-            .enumerated()
-            .reduce(0) { (accum, value) -> CGFloat in
-                let idx = value.offset
-                let point = value.element
-                let previousPoint = points[idx]
-                return accum + point.distance(to: previousPoint)
-            }
-    }
-
-    mutating func calculateSlopes() {
-        guard points.count > 3 else { return }
-
-        let minWalkDist: CGFloat = 20
-        var dist: CGFloat = 0
-        var currentIndex = 0
-
-        var slopes: [PointSlope] = []
-
-        let fm = NumberFormatter()
-        fm.maximumFractionDigits = 3
-        func f(_ m: CGFloat) -> String {
-            fm.string(from: NSNumber(value: Double(m)))!
-        }
-        print("----------------")
-        while currentIndex < points.count - 2 {
-            currentIndex += 1
-            dist += points[currentIndex].distance(to: points[currentIndex-1])
-            if dist >= minWalkDist {
-                let index = currentIndex
-                let a = points[index - 1]
-                let b = points[index + 1]
-                let dx = b.x > a.x ? (b.x - a.x) : (a.x - b.x)
-                let dy = b.x > a.x ? (b.y - a.y) : (a.y - b.y)
-                if abs(dx) <= 0.5 && !slopes.isEmpty { continue }
-                let m = -dy / dx
-                print("\(f(b.x))\t\(f(b.y)) \t\t \(f(a.x))\t\(f(a.y))  \t\t\t\t \(f(m)) \(f(atan(m)))")
-                slopes.append(PointSlope(index: currentIndex, slope: m))
-                dist = 0
-            }
-        }
-        print("===============")
-
-        self.slopes = slopes
     }
 }
 
