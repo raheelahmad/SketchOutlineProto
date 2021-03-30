@@ -99,7 +99,11 @@ public final class Sketcher: UIView {
         guard let angle = currentLine.angles.first(where: { $0.index == index }) else { return }
         angleLabel.text = String(format: "%.2f", angle.angle)
         if angle.isMajorTurn {
-            print(String(format: "Major turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
+            print(String(format: "MAJOR turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
+        } else if angle.isMinorTurn {
+            print(String(format: "minor turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
+        } else {
+            print(String(format: "%.2f (%.2f | %.2f → %.2f) [%d]", angle.angle, angle.normalized, angle.minorThreshold, angle.majorThreshold, angle.index))
         }
     }
 
@@ -135,8 +139,11 @@ public final class Sketcher: UIView {
         setNeedsDisplay()
         currentLine.resample(atLength: 20)
         currentLine.calculateSlopes()
-
         currentLine.calculateAngles()
+        for (idx, angle) in currentLine.angles.enumerated() {
+            let marker = angle.isMajorTurn ? "M" : angle.isMinorTurn ? "m" : "…"
+            print("\(idx) \(marker)")
+        }
         print("Is rect: \(currentLine.boundingRect != nil)")
     }
 
@@ -145,6 +152,7 @@ public final class Sketcher: UIView {
         context?.setFillColor(UIColor.gray.cgColor)
         context?.fill(bounds)
 
+        context?.setLineWidth(2)
         for line in (lines + [currentLine]) {
 
             let linePoints = line.points
@@ -168,6 +176,7 @@ public final class Sketcher: UIView {
         }
 
         if let boundingRect = currentLine.boundingRect {
+            context?.setLineWidth(5)
             context?.setStrokeColor(UIColor.yellow.cgColor)
             context?.stroke(boundingRect)
         }

@@ -10,8 +10,27 @@ import CoreGraphics
 
 extension Line {
     var boundingRect: CGRect? {
-        let majorAnglePoints = angles.filter { $0.isMajorTurn }
-        guard majorAnglePoints.count == 3 else {
+        var currentMinorCumulative: CGFloat = 0
+        var majorCount = 0
+        for (idx, angle) in angles.enumerated() {
+            if angle.isMajorTurn {
+//                ignore current one if previous two were also a major
+                if idx > 0 && angles[idx-1].isMajorTurn { continue }
+                if idx > 1 && angles[idx-2].isMajorTurn { continue }
+                majorCount += 1
+            } else if angle.isMinorTurn {
+                currentMinorCumulative += angle.angle
+                let majorTestAngle = PointAngle(index: -1, angle: currentMinorCumulative)
+                if majorTestAngle.isMajorTurn {
+                    majorCount += 1
+                    currentMinorCumulative = 0
+                }
+            } else {
+                currentMinorCumulative = 0
+            }
+        }
+
+        guard majorCount == 3 else {
             return nil
         }
 

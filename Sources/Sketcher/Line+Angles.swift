@@ -8,13 +8,33 @@
 import Foundation
 import CoreGraphics
 
+/// These two are the crucial elements for recognition
 extension Line.PointAngle {
     var normalized: CGFloat {
         abs(CGFloat.pi - abs(angle)).truncatingRemainder(dividingBy: CGFloat.pi)
     }
+    var minorThreshold: CGFloat { CGFloat.pi / 4.5 }
+    var majorThreshold: CGFloat { CGFloat.pi / 9.8 }
+
     var isMajorTurn: Bool {
-        let threshold = CGFloat.pi / 4.5 // 45 degrees
-        return normalized > threshold
+        return normalized > majorThreshold
+    }
+    var isMinorTurn: Bool {
+        return normalized > minorThreshold
+    }
+}
+
+extension Line {
+    var length: CGFloat {
+        guard points.count > 1 else { return 0 }
+        return points.dropFirst()
+            .enumerated()
+            .reduce(0) { (accum, value) -> CGFloat in
+                let idx = value.offset
+                let point = value.element
+                let previousPoint = points[idx]
+                return accum + point.distance(to: previousPoint)
+            }
     }
 }
 
@@ -50,7 +70,6 @@ extension Line {
             }
         }
 
-        print("Sampled \(points.count) → \(sampled.count)")
         self.points = sampled
     }
 }

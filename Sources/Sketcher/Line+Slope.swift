@@ -20,18 +20,6 @@ extension Line {
         return m
     }
 
-    var length: CGFloat {
-        guard points.count > 1 else { return 0 }
-        return points.dropFirst()
-            .enumerated()
-            .reduce(0) { (accum, value) -> CGFloat in
-                let idx = value.offset
-                let point = value.element
-                let previousPoint = points[idx]
-                return accum + point.distance(to: previousPoint)
-            }
-    }
-
     mutating func calculateSlopes() {
         guard points.count > 3 else { return }
 
