@@ -28,6 +28,15 @@ public final class Sketcher: UIView {
         }
     }
 
+    let showsDebug = false
+
+    var tangentSliderIndex: Int? {
+        didSet {
+            setNeedsDisplay()
+            if tangentSliderIndex != oldValue { updateAngle() }
+        }
+    }
+
     let tangentSlider = UISlider()
     let angleLabel: UILabel = {
         let label = UILabel()
@@ -37,83 +46,17 @@ public final class Sketcher: UIView {
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setup()
+        setupDebugUI()
     }
 
     public required init?(coder: NSCoder) {
         super.init(coder: coder)
-        setup()
-    }
-
-    var showsTangents: Bool = true
-    var showsMultipleLines: Bool = true
-
-    private func setup() {
-        guard showsTangents else {
-            return
-        }
-
-        tangentSlider.minimumValue = 0
-        tangentSlider.addTarget(self, action: #selector(tangentSliderMoved), for: .valueChanged)
-        tangentSlider.addTarget(self, action: #selector(tangentSliderEnded), for: .touchUpInside)
-        tangentSlider.addTarget(self, action: #selector(tangentSliderEnded), for: .touchUpOutside)
-        tangentSlider.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(tangentSlider)
-        NSLayoutConstraint.activate([
-            tangentSlider.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            tangentSlider.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 20)
-        ])
-        angleLabel.translatesAutoresizingMaskIntoConstraints = false
-        addSubview(angleLabel)
-        NSLayoutConstraint.activate([
-            angleLabel.centerXAnchor.constraint(equalTo: centerXAnchor, constant: 0),
-            angleLabel.topAnchor.constraint(equalTo: tangentSlider.bottomAnchor, constant: 20)
-        ])
-    }
-
-    private var tangentSliderIndex: Int? {
-        didSet {
-            setNeedsDisplay()
-            if tangentSliderIndex != oldValue {
-                updateAngle()
-            }
-        }
-    }
-
-    @objc
-    private func tangentSliderMoved() {
-        let index = Int(tangentSlider.value)
-        tangentSliderIndex = index
-    }
-
-    @objc
-    private func tangentSliderEnded() {
-        tangentSliderIndex = nil
-        tangentSlider.value = 0
-    }
-
-    func updateAngle() {
-        guard let index = tangentSliderIndex else {
-            return
-        }
-        guard let angle = currentLine.angles.first(where: { $0.index == index }) else { return }
-        angleLabel.text = String(format: "%.2f", angle.angle)
-        if angle.isMajorTurn {
-            print(String(format: "MAJOR turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
-        } else if angle.isMinorTurn {
-            print(String(format: "minor turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
-        } else {
-            print(String(format: "%.2f (%.2f | %.2f → %.2f) [%d]", angle.angle, angle.normalized, angle.minorThreshold, angle.majorThreshold, angle.index))
-        }
+        setupDebugUI()
     }
 
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         lines.append(currentLine)
         currentLine = Line(id: Date().description, points: [])
-
-        if !showsMultipleLines {
-            lines.removeAll()
-        }
     }
 
     public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -140,11 +83,6 @@ public final class Sketcher: UIView {
         currentLine.resample(atLength: 20)
         currentLine.calculateSlopes()
         currentLine.calculateAngles()
-        for (idx, angle) in currentLine.angles.enumerated() {
-            let marker = angle.isMajorTurn ? "M" : angle.isMinorTurn ? "m" : "…"
-            print("\(idx) \(marker)")
-        }
-        print("Is rect: \(currentLine.boundingRect != nil)")
     }
 
     public override func draw(_ rect: CGRect) {
@@ -181,46 +119,6 @@ public final class Sketcher: UIView {
             context?.stroke(boundingRect)
         }
 
-    }
-
-    func addAngleTexts() {
-        for layer in layer.sublayers!.filter({ $0 is CATextLayer }) {
-            layer.removeFromSuperlayer()
-        }
-
-        let fm = NumberFormatter()
-        fm.maximumFractionDigits = 1
-
-        for (idx, slope) in currentLine.slopes.enumerated() {
-            let slopeTextLayer = CATextLayer()
-            let currentSlope = atan(Double(slope.slope))
-            let slopeText = fm.string(from: NSNumber(value: currentSlope))!
-            slopeTextLayer.string = slopeText
-            slopeTextLayer.font = UIFont.systemFont(ofSize: 12, weight: .thin)
-            slopeTextLayer.fontSize = 10
-            layer.addSublayer(slopeTextLayer)
-            let position = currentLine.points[slope.index]
-            slopeTextLayer.frame = .init(x: position.x - 20 , y: position.y - 10, width: 30, height: 20)
-
-            if idx > 0 {
-                let diffTextLayer = CATextLayer()
-                let previousSlope = atan(Double(currentLine.slopes[idx - 1].slope))
-                let diff = abs(abs(currentSlope) - abs(previousSlope))
-                let diffThreshold = 0.6
-                if diff < diffThreshold {
-                    continue
-                }
-
-                let deltaSlopeText = fm.string(from: NSNumber(value: diff))!
-                let diffText = "  [\(fm.string(from: NSNumber(value: currentSlope))!) • \(fm.string(from: NSNumber(value: previousSlope))!)]"
-                diffTextLayer.string = deltaSlopeText + diffText
-                diffTextLayer.font = UIFont.systemFont(ofSize: 12, weight: .bold)
-                diffTextLayer.fontSize = 10
-                layer.addSublayer(diffTextLayer)
-                let position = currentLine.points[slope.index]
-                diffTextLayer.frame = .init(x: position.x + 20, y: position.y-10, width: 90, height: 20)
-            }
-        }
     }
 
     private func drawTangent(pointIndex: Int, line: Line, ctx: CGContext?) {

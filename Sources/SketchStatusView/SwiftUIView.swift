@@ -1,5 +1,5 @@
 //
-//  SwiftUIView.swift
+//  CanvasView.swift
 //  
 //
 //  Created by Raheel Ahmad on 3/20/21.

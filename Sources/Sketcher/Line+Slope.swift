@@ -8,6 +8,7 @@
 import CoreGraphics
 import Foundation
 
+// TODO: can delete this
 extension Line {
     func tangent(at index: Int) -> CGFloat {
         let slopeDist = 10

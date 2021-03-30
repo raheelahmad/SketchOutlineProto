@@ -12,7 +12,7 @@ import Sketcher
 struct SketchDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            SketchDemoView()
+            CanvasView()
         }
     }
 }
