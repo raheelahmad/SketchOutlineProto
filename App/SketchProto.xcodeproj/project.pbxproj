@@ -13,6 +13,7 @@
 		592879F32606F78000FA0AAC /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 592879F22606F78000FA0AAC /* Preview Assets.xcassets */; };
 		59287A04260711C700FA0AAC /* SketchStatusView in Frameworks */ = {isa = PBXBuildFile; productRef = 59287A03260711C700FA0AAC /* SketchStatusView */; };
 		59287A0F260AD4AD00FA0AAC /* DrawingHelperView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59287A0E260AD4AD00FA0AAC /* DrawingHelperView.swift */; };
+		59B3391626144911007D856E /* NodeView in Frameworks */ = {isa = PBXBuildFile; productRef = 59B3391526144911007D856E /* NodeView */; };
 		59C21F2A26097A8100511477 /* SketchDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C21F2926097A8100511477 /* SketchDemoApp.swift */; };
 		59C21F2C26097A8100511477 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59C21F2B26097A8100511477 /* ContentView.swift */; };
 		59C21F2E26097A8200511477 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 59C21F2D26097A8200511477 /* Assets.xcassets */; };
@@ -50,6 +51,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				59C21F3926097A8A00511477 /* Sketcher in Frameworks */,
+				59B3391626144911007D856E /* NodeView in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -161,6 +163,7 @@
 			name = SketchDemo;
 			packageProductDependencies = (
 				59C21F3826097A8A00511477 /* Sketcher */,
+				59B3391526144911007D856E /* NodeView */,
 			);
 			productName = SketchDemo;
 			productReference = 59C21F2726097A8100511477 /* SketchDemo.app */;
@@ -484,6 +487,10 @@
 		59287A03260711C700FA0AAC /* SketchStatusView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SketchStatusView;
+		};
+		59B3391526144911007D856E /* NodeView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NodeView;
 		};
 		59C21F3826097A8A00511477 /* Sketcher */ = {
 			isa = XCSwiftPackageProductDependency;

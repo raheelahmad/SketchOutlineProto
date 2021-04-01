@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import NodeView
+
 public struct CanvasView: UIViewRepresentable {
     public init() {}
 
@@ -70,15 +72,20 @@ final class CanvasUIView: UIView {
         line.resample(atLength: 20)
         line.calculateAngles()
         if let rect = line.boundingRect {
-            let recognizedView = UIView(frame: rect)
-            recognizedView.backgroundColor = [UIColor.red, UIColor.yellow, UIColor.green, UIColor.brown].randomElement()
-            self.views.append(recognizedView)
+            let nodeView = NodeView.NodeUIView()
+            addSubview(nodeView)
+            nodeView.center = CGPoint(x: rect.midX, y: rect.midY)
+            self.views.append(nodeView)
+            DispatchQueue.main.async {
+                nodeView.activate()
+            }
         }
         self.currentLine = nil
     }
 
     private func startDrawing(with point: CGPoint) {
         currentLine = Line(id: UUID().uuidString, points: [point])
+        endEditing(true)
     }
 
     private func addToDrawing(_ point: CGPoint) {
@@ -99,7 +106,7 @@ extension CanvasUIView {
             return
         }
 
-        for (idx, point) in linePoints.enumerated() {
+        for point in linePoints {
             let size: CGFloat = 1
             context?.fillEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
         }

@@ -11,18 +11,24 @@ let package = Package(
         .library(name: "SketchStatusView", targets: ["SketchStatusView"]),
         .library(name: "Style", targets: ["Style"]),
         .library(name: "Sketcher", targets: ["Sketcher"]),
+        .library(name: "NodeView", targets: ["NodeView"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
+        .package(url: "https://github.com/SnapKit/SnapKit.git", .upToNextMajor(from: "5.0.1"))
     ],
     targets: [
         .target(
             name: "SketchStatusView",
-            dependencies: [.target(name: "Style")]),
+            dependencies: [.target(name: "Style"),]),
+        .target(
+            name: "NodeView",
+            dependencies: [.target(name: "Style"), "SnapKit"]),
+//
         .target(
             name: "Sketcher",
-            dependencies: [.target(name: "Style")]),
+            dependencies: [.target(name: "Style"), .target(name: "NodeView")]),
         .target(
             name: "Style",
             dependencies: []),
