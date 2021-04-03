@@ -42,60 +42,44 @@ final class CanvasUIView: UIView {
         }
     }
 
+    lazy var nodeRecognizer = NodeRecognizer(target: self, action: #selector(nodeRecognition(recognizer:)))
+
     init() {
         super.init(frame: .zero)
 
+        addGestureRecognizer(nodeRecognizer)
+    }
+
+    @objc
+    private func nodeRecognition(recognizer: NodeRecognizer) {
+        switch recognizer.state {
+        case .recognized:
+            if let line = recognizer.line?.boundingRect {
+                addNode(in: line)
+            }
+        default:
+            break
+        }
+        setNeedsDisplay()
     }
 
     @available(*, unavailable)
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
-    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let point = touches.first?.location(in: self) else { return }
-        startDrawing(with: point)
-    }
-
-    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let point = touches.first?.location(in: self) else { return }
-        addToDrawing(point)
-    }
-
-    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        finalizeDrawing()
-    }
 }
 
 extension CanvasUIView {
-    private func finalizeDrawing() {
-        guard var line = currentLine else {
-            return
+    private func addNode(in rect: CGRect) {
+        let nodeView = NodeView.NodeUIView()
+        let dragger = UIDragInteraction(delegate: self)
+        nodeView.addInteraction(dragger)
+        addSubview(nodeView)
+        nodeView.center = CGPoint(x: rect.midX, y: rect.midY)
+        self.views.append(nodeView)
+        DispatchQueue.main.async {
+            nodeView.activateEditing()
         }
-        line.resample(atLength: 20)
-        line.calculateAngles()
-        if let rect = line.boundingRect {
-            let nodeView = NodeView.NodeUIView()
-            let dragger = UIDragInteraction(delegate: self)
-            nodeView.addInteraction(dragger)
-            addSubview(nodeView)
-            nodeView.center = CGPoint(x: rect.midX, y: rect.midY)
-            self.views.append(nodeView)
-            DispatchQueue.main.async {
-                nodeView.activateEditing()
-            }
-        }
-        self.currentLine = nil
-    }
-
-    private func startDrawing(with point: CGPoint) {
-        currentLine = Line(id: UUID().uuidString, points: [point])
-        endEditing(true)
-    }
-
-    private func addToDrawing(_ point: CGPoint) {
-        assert(currentLine != nil)
-        currentLine?.points.append(point)
     }
 }
 
@@ -111,7 +95,7 @@ extension CanvasUIView {
         context?.setFillColor(UIColor.white.cgColor)
         context?.fill(rect)
 
-        if let p = currentLine?.bezier() {
+        if let p = nodeRecognizer.line?.bezier() {
             context?.setStrokeColor(UIColor.red.cgColor)
             context?.setLineWidth(5)
 

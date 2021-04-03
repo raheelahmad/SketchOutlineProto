@@ -19,6 +19,7 @@ extension Line {
                 if idx > 1 && angles[idx-2].isMajorTurn { continue }
                 majorCount += 1
             } else if angle.isMinorTurn {
+                // could still have a cumulative major angle
                 currentMinorCumulative += angle.angle
                 let majorTestAngle = PointAngle(index: -1, angle: currentMinorCumulative)
                 if majorTestAngle.isMajorTurn {
