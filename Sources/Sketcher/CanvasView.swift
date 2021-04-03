@@ -44,6 +44,7 @@ final class CanvasUIView: UIView {
 
     init() {
         super.init(frame: .zero)
+
     }
 
     @available(*, unavailable)
@@ -64,7 +65,9 @@ final class CanvasUIView: UIView {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         finalizeDrawing()
     }
+}
 
+extension CanvasUIView {
     private func finalizeDrawing() {
         guard var line = currentLine else {
             return
@@ -73,11 +76,13 @@ final class CanvasUIView: UIView {
         line.calculateAngles()
         if let rect = line.boundingRect {
             let nodeView = NodeView.NodeUIView()
+            let dragger = UIDragInteraction(delegate: self)
+            nodeView.addInteraction(dragger)
             addSubview(nodeView)
             nodeView.center = CGPoint(x: rect.midX, y: rect.midY)
             self.views.append(nodeView)
             DispatchQueue.main.async {
-                nodeView.activate()
+                nodeView.activateEditing()
             }
         }
         self.currentLine = nil
@@ -94,21 +99,52 @@ final class CanvasUIView: UIView {
     }
 }
 
+extension CanvasUIView: UIDragInteractionDelegate {
+    func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
+        [UIDragItem(itemProvider: NSItemProvider())]
+    }
+}
+
 extension CanvasUIView {
     override func draw(_ rect: CGRect) {
-
         let context = UIGraphicsGetCurrentContext()
         context?.setFillColor(UIColor.white.cgColor)
         context?.fill(rect)
 
-        context?.setFillColor(UIColor.red.cgColor)
-        guard let linePoints = currentLine?.points else {
-            return
+        if let p = currentLine?.bezier() {
+            context?.setStrokeColor(UIColor.red.cgColor)
+            context?.setLineWidth(5)
+
+            context?.addPath(p.cgPath)
+            context?.strokePath()
+        }
+    }
+}
+
+extension Line {
+    func bezier() -> UIBezierPath {
+        let path = UIBezierPath()
+        let points = self.points.sampled(atLength: 10)
+        guard points.count > 1 else {
+            return path
         }
 
-        for point in linePoints {
-            let size: CGFloat = 1
-            context?.fillEllipse(in: CGRect(x: point.x - size , y: point.y - size, width: size*2, height: size*2))
+        path.move(to: points[0])
+
+        let first = 0
+        let last = points.count - 2
+        for (idx, point) in points.enumerated().dropLast() {
+            let next = points[idx + 1]
+            let midCurrent = point.midPoint(between: next)
+            if idx == first {
+                path.addLine(to: midCurrent)
+            } else if idx == last {
+                path.addLine(to: next)
+            } else {
+                path.addQuadCurve(to: midCurrent, controlPoint: point)
+            }
         }
+
+        return path
     }
 }

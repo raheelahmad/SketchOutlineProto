@@ -7,6 +7,7 @@
 
 import SwiftUI
 import SnapKit
+import Combine
 
 import Style
 
@@ -51,8 +52,21 @@ public final class NodeUIView: UIView {
 }
 
 extension NodeUIView {
-    public func activate() {
+    public func activateEditing() {
         field.becomeFirstResponder()
+    }
+
+    public func highlighted(_ active: Bool) {
+        alpha = active ? 0.3 : 1.0
+        layer.shadowOpacity = active ? 0.8 : 1.0
+    }
+
+    @objc
+    func longPressed(recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .recognized else {
+            return
+        }
+        highlighted(true)
     }
 }
 
@@ -62,7 +76,6 @@ struct NodeView_Previews: PreviewProvider {
             NodeView()
             Text("Hello")
         }
-        .previewDevice(/*@START_MENU_TOKEN@*/"iPhone 12 mini"/*@END_MENU_TOKEN@*/)
-//        .preferredColorScheme(.dark)
+          .previewDevice(/*@START_MENU_TOKEN@*/"iPhone 12 mini"/*@END_MENU_TOKEN@*/)
     }
 }

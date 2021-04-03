@@ -18,7 +18,6 @@ extension Line {
         }
 
         context?.addPath(path.cgPath)
-        context?.setStrokeColor(UIColor.red.cgColor)
         context?.strokePath()
     }
 }
