@@ -38,8 +38,6 @@ final class LinkRecognizer: UIGestureRecognizer {
                 return
             }
 
-            state = .began
-
             line = Line(id: UUID().uuidString, points: [location])
             self.trackedTouch = trackedTouch
             self.initialSubview = initialSubview
@@ -54,10 +52,14 @@ final class LinkRecognizer: UIGestureRecognizer {
         }
         let location = self.location(in: view)
         line?.points.append(location)
-        /// TODO: can inspect line's points (similar to boundingRect) to
-        /// check if it has failed already.
-        /// E.g., if it has moved in the wrong angles (e.g., making an angle more than 180 deg)
-        state = .changed
+
+        if state != .changed {
+            if let length = line?.length, length > 10 {
+                state = .began
+            }
+        } else {
+            state = .changed
+        }
     }
 
     private func isInitialPointValid(_ point: CGPoint) -> Bool {

@@ -165,7 +165,7 @@ extension CanvasUIView {
         }
 
         for link in self.links.map({ $0.path }) {
-            context?.setStrokeColor(UIColor.yellow.cgColor)
+            context?.setStrokeColor(UIColor.systemGray3.cgColor)
             context?.setLineWidth(6)
 
             context?.addPath(link.cgPath)

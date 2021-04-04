@@ -23,6 +23,7 @@ public final class NodeUIView: UIView {
     let field: UITextField = {
         let field = UITextField()
         field.placeholder = "Text"
+        field.textColor = .systemGray6
         return field
     }()
 
