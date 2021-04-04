@@ -7,9 +7,14 @@
 
 import UIKit
 
-final class NodeRecognizer: UIGestureRecognizer {
+final class LinkRecognizer: UIGestureRecognizer {
     private(set) var line: Line?
     private var trackedTouch: UITouch?
+
+    /// This will exist if there is a valid gesture
+    private(set) var initialSubview: UIView?
+    /// This may not exist
+    private(set) var finalSubview: UIView?
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
@@ -28,13 +33,16 @@ final class NodeRecognizer: UIGestureRecognizer {
         } else {
             let trackedTouch = touches.first!
             let location = trackedTouch.location(in: view)
-            guard isPointValid(location) else {
+            guard let initialSubview = subView(at: location) else {
                 state = .failed
                 return
             }
 
+            state = .began
+
             line = Line(id: UUID().uuidString, points: [location])
             self.trackedTouch = trackedTouch
+            self.initialSubview = initialSubview
         }
     }
 
@@ -45,30 +53,29 @@ final class NodeRecognizer: UIGestureRecognizer {
             return
         }
         let location = self.location(in: view)
-        guard isPointValid(location) else {
-            state = .failed
-            return
-        }
         line?.points.append(location)
         /// TODO: can inspect line's points (similar to boundingRect) to
         /// check if it has failed already.
         /// E.g., if it has moved in the wrong angles (e.g., making an angle more than 180 deg)
-
-        // even though this is a discrete GR (recognized at the end only), setting changed allows the state to be sent
-        // to the target continuously, which it needs to build the node outline.
         state = .changed
     }
 
-    private func isPointValid(_ point: CGPoint) -> Bool {
+    private func isInitialPointValid(_ point: CGPoint) -> Bool {
+        return subView(at: point) != nil
+    }
+
+    // TODO: could be an extension of GR
+    private func subView(at point: CGPoint) -> UIView? {
+        // TODO: use map
         for subView in (self.view?.subviews ?? []) {
             let pointInSubview = subView.convert(point, from: self.view)
             // should not overlap any subview
             if subView.bounds.contains(pointInSubview) {
-                return false
+                return subView
             }
         }
 
-        return true
+        return nil
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
@@ -78,13 +85,9 @@ final class NodeRecognizer: UIGestureRecognizer {
             return
         }
 
-        line?.resample(atLength: 20)
-        line?.calculateAngles()
-        if line?.boundingRect != nil {
-            state = .recognized
-        } else {
-            state = .failed
-        }
+        let location = self.location(in: view)
+        finalSubview = subView(at: location)
+        state = .ended
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {

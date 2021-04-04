@@ -27,6 +27,26 @@ struct SwiftUIView_Previews: PreviewProvider {
     }
 }
 
+final class LinkUIView: UIView {
+    let from: NodeUIView
+    let to: NodeUIView
+    let path: UIBezierPath
+
+    init(from: NodeUIView, to: NodeUIView, path: UIBezierPath) {
+        self.from = from
+        self.to = to
+        self.path = path
+
+        super.init(frame: .zero)
+    }
+
+    @available(*, unavailable)
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+}
+
 final class CanvasUIView: UIView {
     var currentLine: Line? = nil {
         didSet {
@@ -34,9 +54,17 @@ final class CanvasUIView: UIView {
         }
     }
 
-    private var views: [UIView] = [] {
+    private var nodes: [NodeUIView] = [] {
         didSet {
-            for view in views {
+            for view in nodes {
+                addSubview(view)
+            }
+        }
+    }
+
+    private var links: [LinkUIView] = [] {
+        didSet {
+            for view in links {
                 addSubview(view)
             }
         }
@@ -44,18 +72,43 @@ final class CanvasUIView: UIView {
 
     lazy var nodeRecognizer = NodeRecognizer(target: self, action: #selector(nodeRecognition(recognizer:)))
 
+    lazy var linkRecognizer = LinkRecognizer(target: self, action: #selector(linkRecognition(recognizer:)))
+
     init() {
         super.init(frame: .zero)
 
         addGestureRecognizer(nodeRecognizer)
+        addGestureRecognizer(linkRecognizer)
+    }
+
+    @objc
+    private func linkRecognition(recognizer: LinkRecognizer) {
+        switch recognizer.state {
+        case .recognized:
+            guard let from = recognizer.initialSubview else {
+                assertionFailure("No from view for a recognized link")
+                return
+            }
+            guard let line = recognizer.line else {
+                assertionFailure("No line for a recognized link")
+                return
+            }
+
+            let to = recognizer.finalSubview ?? addNode(at: line.points.last!)
+            let link = LinkUIView(from: from as! NodeUIView, to: to as! NodeUIView, path: line.bezier())
+            self.links.append(link)
+        default:
+            break
+        }
+        setNeedsDisplay()
     }
 
     @objc
     private func nodeRecognition(recognizer: NodeRecognizer) {
         switch recognizer.state {
         case .recognized:
-            if let line = recognizer.line?.boundingRect {
-                addNode(in: line)
+            if let rect = recognizer.line?.boundingRect {
+                addNode(at: CGPoint(x: rect.midX, y: rect.midY))
             }
         default:
             break
@@ -70,16 +123,18 @@ final class CanvasUIView: UIView {
 }
 
 extension CanvasUIView {
-    private func addNode(in rect: CGRect) {
+    @discardableResult
+    private func addNode(at point: CGPoint) -> NodeUIView {
         let nodeView = NodeView.NodeUIView()
         let dragger = UIDragInteraction(delegate: self)
         nodeView.addInteraction(dragger)
         addSubview(nodeView)
-        nodeView.center = CGPoint(x: rect.midX, y: rect.midY)
-        self.views.append(nodeView)
+        nodeView.center = point
+        self.nodes.append(nodeView)
         DispatchQueue.main.async {
             nodeView.activateEditing()
         }
+        return nodeView
     }
 }
 
@@ -100,6 +155,20 @@ extension CanvasUIView {
             context?.setLineWidth(5)
 
             context?.addPath(p.cgPath)
+            context?.strokePath()
+        } else if let p = linkRecognizer.line?.bezier() {
+            context?.setStrokeColor(UIColor.yellow.cgColor)
+            context?.setLineWidth(12)
+
+            context?.addPath(p.cgPath)
+            context?.strokePath()
+        }
+
+        for link in self.links.map({ $0.path }) {
+            context?.setStrokeColor(UIColor.yellow.cgColor)
+            context?.setLineWidth(6)
+
+            context?.addPath(link.cgPath)
             context?.strokePath()
         }
     }
