@@ -8,42 +8,71 @@
 import SwiftUI
 import Combine
 
+public final class Coordinator {
+    private var cancellables: [AnyCancellable] = []
+    private let view: CanvasView
+
+    init(view: CanvasView) {
+        self.view = view
+        DispatchQueue.main.async {
+            do {
+                view.nodes = try self.read()
+            }
+            catch { assertionFailure("Error reading \(error.localizedDescription)") }
+        }
+    }
+
+    func bindRecognizers(canvasView: CanvasUIView) {
+        canvasView.nodeRecognized
+            .sink { [weak self] recognition in
+                guard let self = self else { return }
+                NodesReducer.nodeRecognition(
+                    nodes: &self.view.nodes,
+                    parentBounds: canvasView.bounds,
+                    recognition: recognition
+                )
+
+                do { try self.write(self.view.nodes) }
+                catch { assertionFailure("Error saving \(error.localizedDescription)") }
+            }.store(in: &cancellables)
+
+        canvasView.linkRecognized.sink { [weak self] linkRecognition in
+            guard let self = self else { return }
+            NodesReducer.linkRecognition(
+                nodes: &self.view.nodes,
+                parentBounds: canvasView.bounds,
+                recognition: linkRecognition
+            )
+
+            do { try self.write(self.view.nodes) }
+            catch { assertionFailure("Error saving \(error.localizedDescription)") }
+
+        }.store(in: &cancellables)
+
+    }
+
+    private let nodesStorageKey = "Nodes"
+    private func read() throws -> [Node] {
+        guard let nodesData = UserDefaults.standard.data(forKey: nodesStorageKey)
+        else {
+            return []
+        }
+
+        let nodes = try JSONDecoder().decode([Node].self, from: nodesData)
+        return nodes
+    }
+    private func write(_ nodes: [Node]) throws {
+        let data = try JSONEncoder().encode(nodes)
+        UserDefaults.standard.setValue(data, forKey: nodesStorageKey)
+    }
+}
+
 public struct CanvasView: UIViewRepresentable {
     // LATER: move to a ViewModel
     @State var nodes: [Node] = []
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(view: self)
-    }
-
-    public final class Coordinator {
-        private var cancellables: [AnyCancellable] = []
-        private let view: CanvasView
-
-        init(view: CanvasView) {
-            self.view = view
-        }
-
-        func bindRecognizers(canvasView: CanvasUIView) {
-            canvasView.nodeRecognized
-                .sink { [weak self] recognition in
-                    guard let self = self else { return }
-                    NodesReducer.nodeRecognition(
-                        nodes: &self.view.nodes,
-                        parentBounds: canvasView.bounds,
-                        recognition: recognition
-                    )
-                }.store(in: &cancellables)
-
-            canvasView.linkRecognized.sink { [weak self] linkRecognition in
-                guard let self = self else { return }
-                NodesReducer.linkRecognition(
-                    nodes: &self.view.nodes,
-                    parentBounds: canvasView.bounds,
-                    recognition: linkRecognition
-                )
-            }.store(in: &cancellables)
-        }
     }
 
     public init() {}
