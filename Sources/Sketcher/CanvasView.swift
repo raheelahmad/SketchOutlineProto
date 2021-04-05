@@ -38,7 +38,24 @@ final class LinkUIView: UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+}
 
+final class LinkLayer: CAShapeLayer {
+    let fromId: String
+    let toId: String
+
+    init(fromId: String, toId: String) {
+        self.fromId = fromId
+        self.toId = toId
+
+        super.init()
+
+        self.strokeColor = UIColor.red.cgColor
+        self.lineWidth = 6
+        self.fillColor = UIColor.clear.cgColor
+    }
+
+    required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 struct NodeRecognition {
@@ -65,10 +82,11 @@ public final class CanvasUIView: UIView {
         }
     }
 
-    private var links: [LinkUIView] = [] {
+    private var links: [LinkLayer] = [] {
         didSet {
-            for view in links {
-                addSubview(view)
+            for layer in links {
+                // Make sure all link layers are below all subviews (the node views)
+                self.layer.insertSublayer(layer, at: 0)
             }
         }
     }
@@ -143,24 +161,40 @@ extension CanvasUIView {
         // TODO: links (update paths, remove, insert)
         for node in updated {
             for linkedNodeId in node.linkedNodeIds {
-                if let existing = links.first(where: { $0.from.id == node.id && $0.to.id == linkedNodeId }) {
-                    existing.updatePath()
-                } else {
-                    guard
-                        let from = nodes.first(where: { $0.id == node.id }),
-                        let to = nodes.first(where: { $0.id == linkedNodeId })
-                        else {
-                            assertionFailure("Could not find nodes to link to")
-                            continue
-                    }
-
-                    let linkView = LinkUIView(from: from, to: to)
-                    links.append(linkView)
+                guard
+                    let from = nodes.first(where: { $0.id == node.id }),
+                    let to = nodes.first(where: { $0.id == linkedNodeId })
+                else {
+                    assertionFailure("Could not find nodes to link to")
+                    continue
                 }
+
+                let linkLayer: LinkLayer
+                if let existing = links.first(where: { $0.fromId == node.id && $0.toId == linkedNodeId }) {
+                    linkLayer = existing
+                } else {
+                    let newLinkLayer = LinkLayer(fromId: from.id, toId: to.id)
+                    links.append(newLinkLayer)
+                    linkLayer = newLinkLayer
+                }
+
+                updateLinkPath(from: from, to: to, layer: linkLayer)
             }
         }
 
         setNeedsDisplay()
+    }
+
+    private func updateLinkPath(from: NodeUIView, to: NodeUIView, layer: LinkLayer) {
+        let p = UIBezierPath()
+        p.move(to: from.center)
+        let mid = from.center.midPoint(between: to.center)
+        var mid1 = from.center.midPoint(between: mid)
+        var mid2 = mid.midPoint(between: to.center)
+        mid1.y -= 30
+        mid2.y -= 30
+        p.addCurve(to: to.center, controlPoint1: mid1, controlPoint2: mid2)
+        layer.path = p.cgPath
     }
 }
 
@@ -195,6 +229,7 @@ extension CanvasUIView {
         context?.setFillColor(UIColor.white.cgColor)
         context?.fill(rect)
 
+        // Draw any in-progress paths
         if let p = nodeRecognizer.line?.bezier() {
             context?.setStrokeColor(UIColor.red.cgColor)
             context?.setLineWidth(5)
@@ -211,12 +246,12 @@ extension CanvasUIView {
 
         // TODO: currently saving path in LinkUIView without drawing it there.
         // Should just use a CALayer
-        for link in self.links.map({ $0.path }) {
-            context?.setStrokeColor(UIColor.systemGray3.cgColor)
-            context?.setLineWidth(6)
-
-            context?.addPath(link.cgPath)
-            context?.strokePath()
-        }
+//        for link in self.links.map({ $0.path }) {
+//            context?.setStrokeColor(UIColor.systemGray3.cgColor)
+//            context?.setLineWidth(6)
+//
+//            context?.addPath(link.cgPath)
+//            context?.strokePath()
+//        }
     }
 }
