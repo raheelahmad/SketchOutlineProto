@@ -6,15 +6,16 @@
 //
 
 import UIKit
+import NodeView
 
 final class LinkRecognizer: UIGestureRecognizer {
     private(set) var line: Line?
     private var trackedTouch: UITouch?
 
     /// This will exist if there is a valid gesture
-    private(set) var initialSubview: UIView?
+    private(set) var initialSubview: NodeUIView?
     /// This may not exist
-    private(set) var finalSubview: UIView?
+    private(set) var finalSubview: NodeUIView?
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesBegan(touches, with: event)
@@ -67,9 +68,10 @@ final class LinkRecognizer: UIGestureRecognizer {
     }
 
     // TODO: could be an extension of GR
-    private func subView(at point: CGPoint) -> UIView? {
+    private func subView(at point: CGPoint) -> NodeUIView? {
         // TODO: use map
-        for subView in (self.view?.subviews ?? []) {
+        let subViews = (self.view?.subviews ?? []).compactMap { $0 as? NodeUIView }
+        for subView in subViews {
             let pointInSubview = subView.convert(point, from: self.view)
             // should not overlap any subview
             if subView.bounds.contains(pointInSubview) {

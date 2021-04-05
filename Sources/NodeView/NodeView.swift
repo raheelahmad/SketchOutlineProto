@@ -13,13 +13,15 @@ import Style
 
 struct NodeView: UIViewRepresentable {
     func makeUIView(context: Context) -> some UIView {
-            NodeUIView()
+        NodeUIView(id: UUID().uuidString)
     }
 
     func updateUIView(_ uiView: UIViewType, context: Context) { }
 }
 
 public final class NodeUIView: UIView {
+    public let id: String
+
     let field: UITextField = {
         let field = UITextField()
         field.placeholder = "Text"
@@ -27,7 +29,8 @@ public final class NodeUIView: UIView {
         return field
     }()
 
-    public init() {
+    public init(id: String) {
+        self.id = id
         super.init(frame: .zero)
         backgroundColor = [UIColor.hex(0x454440), UIColor.hex(0x409D8F), UIColor.hex(0xF92943)].randomElement()!
         addSubview(field)

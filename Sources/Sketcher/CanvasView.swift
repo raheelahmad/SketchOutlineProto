@@ -6,18 +6,100 @@
 //
 
 import SwiftUI
+import Combine
 
 import NodeView
 
 public struct CanvasView: UIViewRepresentable {
-    public init() {}
+    @State var nodes: [Node] = []
 
-    public func makeUIView(context: Context) -> some UIView {
-        CanvasUIView()
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(view: self)
     }
 
-    public func updateUIView(_ uiView: UIViewType, context: Context) {
+    public final class Coordinator {
+        private var cancellables: [AnyCancellable] = []
+        private let view: CanvasView
 
+        init(view: CanvasView) {
+            self.view = view
+        }
+
+        func bindRecognizers(canvasView: CanvasUIView) {
+            // TODO: both these can be factored out as reducers:
+            // reduceNodeRecognition: inout [Node], recognition: NodeRecognition
+            // reduceLinkRecognition: inout [Node], recognition: LinkRecognition
+            canvasView.nodeRecognized
+                .sink { [weak self] recognition in
+                    guard let self = self else { return }
+
+                    let posX =  recognition.center.x / canvasView.bounds.width
+                    let posY = recognition.center.y / canvasView.bounds.height
+                    let node = Node(
+                        id: UUID().uuidString,
+                        title: "",
+                        colorHex: "8312A8",
+                        fractPos: .init(x: Double(posX), y: Double(posY)),
+                        linkedNodeIds: []
+                    )
+                    self.view.nodes.append(node)
+                }.store(in: &cancellables)
+
+            canvasView.linkRecognized.sink { [weak self] linkRecognition in
+                guard let self = self else { return }
+                var nodes = self.view.nodes
+
+                switch linkRecognition {
+                case .fromTo(let fromNodeId, let toNodeId):
+                    guard
+                        let fromNodeIndex = nodes.firstIndex(where: { $0.id == fromNodeId }),
+                        nodes.contains(where: { $0.id == toNodeId })
+                    else {
+                        assertionFailure("Could not find nodes")
+                        return
+                    }
+
+                    var fromNode = nodes[fromNodeIndex]
+                    fromNode.linkedNodeIds.insert(toNodeId)
+                    nodes[fromNodeIndex] = fromNode
+                case let .onlyFrom(fromNodeId, to):
+                    guard
+                        let fromNodeIndex = nodes.firstIndex(where: { $0.id == fromNodeId })
+                    else {
+                        assertionFailure("Could not find node")
+                        return
+                    }
+
+                    let posX =  to.x / canvasView.bounds.width
+                    let posY = to.y / canvasView.bounds.height
+                    var fromNode = nodes[fromNodeIndex]
+                    let toNode = Node(
+                        id: UUID().uuidString,
+                        title: "",
+                        colorHex: "8218AD",
+                        fractPos: .init(x: Double(posX), y: Double(posY)),
+                        linkedNodeIds: []
+                    )
+                    fromNode.linkedNodeIds.insert(toNode.id)
+                    nodes.append(toNode)
+                    nodes[fromNodeIndex] = fromNode
+                }
+
+                self.view.nodes = nodes
+            }.store(in: &cancellables)
+        }
+    }
+
+    public init() {}
+
+    public func makeUIView(context: Context) -> CanvasUIView {
+        let view = CanvasUIView()
+        context.coordinator.bindRecognizers(canvasView: view)
+        return view
+    }
+
+    public func updateUIView(_ uiView: CanvasUIView, context: Context) {
+        uiView.update(nodes)
     }
 }
 
@@ -30,14 +112,25 @@ struct SwiftUIView_Previews: PreviewProvider {
 final class LinkUIView: UIView {
     let from: NodeUIView
     let to: NodeUIView
-    let path: UIBezierPath
+    private(set) var path: UIBezierPath
 
-    init(from: NodeUIView, to: NodeUIView, path: UIBezierPath) {
+    init(from: NodeUIView, to: NodeUIView) {
         self.from = from
         self.to = to
-        self.path = path
+        self.path = Self.path(from: from, to: to)
 
         super.init(frame: .zero)
+    }
+
+    func updatePath() {
+        self.path = Self.path(from: from, to: to)
+    }
+
+    private static func path(from: UIView, to: UIView) -> UIBezierPath {
+        let p = UIBezierPath()
+        p.move(to: from.center)
+        p.addLine(to: to.center)
+        return p
     }
 
     @available(*, unavailable)
@@ -47,14 +140,23 @@ final class LinkUIView: UIView {
 
 }
 
-final class CanvasUIView: UIView {
+struct NodeRecognition {
+    let center: CGPoint
+}
+
+enum LinkRecognition {
+    case onlyFrom(fromNodeId: String, to: CGPoint)
+    case fromTo(fromNodeId: String, toNodeId: String)
+}
+
+public final class CanvasUIView: UIView {
     var currentLine: Line? = nil {
         didSet {
             setNeedsDisplay()
         }
     }
 
-    private var nodes: [NodeUIView] = [] {
+    private(set) var nodes: [NodeUIView] = [] {
         didSet {
             for view in nodes {
                 addSubview(view)
@@ -70,8 +172,10 @@ final class CanvasUIView: UIView {
         }
     }
 
-    lazy var nodeRecognizer = NodeRecognizer(target: self, action: #selector(nodeRecognition(recognizer:)))
+    let nodeRecognized = PassthroughSubject<NodeRecognition, Never>()
+    let linkRecognized = PassthroughSubject<LinkRecognition, Never>()
 
+    lazy var nodeRecognizer = NodeRecognizer(target: self, action: #selector(nodeRecognition(recognizer:)))
     lazy var linkRecognizer = LinkRecognizer(target: self, action: #selector(linkRecognition(recognizer:)))
 
     init() {
@@ -94,9 +198,11 @@ final class CanvasUIView: UIView {
                 return
             }
 
-            let to = recognizer.finalSubview ?? addNode(at: line.points.last!)
-            let link = LinkUIView(from: from as! NodeUIView, to: to as! NodeUIView, path: line.bezier())
-            self.links.append(link)
+            if let recognizedToView = recognizer.finalSubview {
+                linkRecognized.send(.fromTo(fromNodeId: from.id, toNodeId: recognizedToView.id))
+            } else {
+                linkRecognized.send(.onlyFrom(fromNodeId: from.id, to: line.points.last!))
+            }
         default:
             break
         }
@@ -108,7 +214,7 @@ final class CanvasUIView: UIView {
         switch recognizer.state {
         case .recognized:
             if let rect = recognizer.line?.boundingRect {
-                addNode(at: CGPoint(x: rect.midX, y: rect.midY))
+                nodeRecognized.send(NodeRecognition(center: CGPoint(x: rect.midX, y: rect.midY)))
             }
         default:
             break
@@ -123,29 +229,67 @@ final class CanvasUIView: UIView {
 }
 
 extension CanvasUIView {
-    @discardableResult
-    private func addNode(at point: CGPoint) -> NodeUIView {
-        let nodeView = NodeView.NodeUIView()
-        let dragger = UIDragInteraction(delegate: self)
-        nodeView.addInteraction(dragger)
-        addSubview(nodeView)
-        nodeView.center = point
-        self.nodes.append(nodeView)
-        DispatchQueue.main.async {
-            nodeView.activateEditing()
+    func update(_ updated: [Node]) {
+        let existingNodeIds = nodes.map { $0.id }
+        let new = updated.filter { !existingNodeIds.contains($0.id) }
+        for newNode in new {
+            addNode(for: newNode)
         }
-        return nodeView
+
+        // TODO: modified: update centers
+        // TODO: deleted: 
+
+        // TODO: links (update paths, remove, insert)
+        for node in updated {
+            for linkedNodeId in node.linkedNodeIds {
+                if let existing = links.first(where: { $0.from.id == node.id && $0.to.id == linkedNodeId }) {
+                    existing.updatePath()
+                } else {
+                    guard
+                        let from = nodes.first(where: { $0.id == node.id }),
+                        let to = nodes.first(where: { $0.id == linkedNodeId })
+                        else {
+                            assertionFailure("Could not find nodes to link to")
+                            continue
+                    }
+
+                    let linkView = LinkUIView(from: from, to: to)
+                    links.append(linkView)
+                }
+            }
+        }
+
+        setNeedsDisplay()
+    }
+}
+
+extension CanvasUIView {
+    @discardableResult
+    private func addNode(for node: Node) -> NodeUIView {
+        let view = NodeUIView(id: node.id)
+        view.center = .init(
+            x: bounds.width * CGFloat(node.fractPos.x),
+            y: bounds.height * CGFloat(node.fractPos.y)
+        )
+        let dragger = UIDragInteraction(delegate: self)
+        view.addInteraction(dragger)
+        addSubview(view)
+        self.nodes.append(view)
+        DispatchQueue.main.async {
+            view.activateEditing()
+        }
+        return view
     }
 }
 
 extension CanvasUIView: UIDragInteractionDelegate {
-    func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
+    public func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
         [UIDragItem(itemProvider: NSItemProvider())]
     }
 }
 
 extension CanvasUIView {
-    override func draw(_ rect: CGRect) {
+    public override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
         context?.setFillColor(UIColor.white.cgColor)
         context?.fill(rect)
@@ -171,33 +315,5 @@ extension CanvasUIView {
             context?.addPath(link.cgPath)
             context?.strokePath()
         }
-    }
-}
-
-extension Line {
-    func bezier() -> UIBezierPath {
-        let path = UIBezierPath()
-        let points = self.points.sampled(atLength: 10)
-        guard points.count > 1 else {
-            return path
-        }
-
-        path.move(to: points[0])
-
-        let first = 0
-        let last = points.count - 2
-        for (idx, point) in points.enumerated().dropLast() {
-            let next = points[idx + 1]
-            let midCurrent = point.midPoint(between: next)
-            if idx == first {
-                path.addLine(to: midCurrent)
-            } else if idx == last {
-                path.addLine(to: next)
-            } else {
-                path.addQuadCurve(to: midCurrent, controlPoint: point)
-            }
-        }
-
-        return path
     }
 }
