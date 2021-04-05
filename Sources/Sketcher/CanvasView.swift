@@ -32,8 +32,7 @@ public final class Coordinator {
                     recognition: recognition
                 )
 
-                do { try self.write(self.view.nodes) }
-                catch { assertionFailure("Error saving \(error.localizedDescription)") }
+                self.save()
             }.store(in: &cancellables)
 
         canvasView.linkRecognized.sink { [weak self] linkRecognition in
@@ -44,11 +43,22 @@ public final class Coordinator {
                 recognition: linkRecognition
             )
 
-            do { try self.write(self.view.nodes) }
-            catch { assertionFailure("Error saving \(error.localizedDescription)") }
+            self.save()
 
         }.store(in: &cancellables)
 
+        canvasView.textUpdated
+            .sink { [weak self] update in
+                guard let self = self else { return }
+
+                NodesReducer.updateText(nodes: &self.view.nodes, update: update)
+                self.save()
+            }.store(in: &cancellables)
+    }
+
+    private func save() {
+        do { try self.write(self.view.nodes) }
+        catch { assertionFailure("Error saving \(error.localizedDescription)") }
     }
 
     private let nodesStorageKey = "Nodes"

@@ -56,4 +56,13 @@ final class NodesReducer {
         )
         nodes.append(node)
     }
+
+    static func updateText(nodes: inout [Node], update: TextUpdate) {
+        guard let nodeIndex = nodes.firstIndex(where: { $0.id == update.nodeId }) else {
+            assertionFailure("Could not find node after text update")
+            return
+        }
+
+        nodes[nodeIndex].title = update.text
+    }
 }

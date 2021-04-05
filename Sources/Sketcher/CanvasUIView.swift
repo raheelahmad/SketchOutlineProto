@@ -37,6 +37,11 @@ enum LinkRecognition {
     case fromTo(fromNodeId: String, toNodeId: String)
 }
 
+struct TextUpdate {
+    let text: String?
+    let nodeId: String
+}
+
 public final class CanvasUIView: UIView {
     var currentLine: Line? = nil {
         didSet {
@@ -64,8 +69,12 @@ public final class CanvasUIView: UIView {
     let nodeRecognized = PassthroughSubject<NodeRecognition, Never>()
     let linkRecognized = PassthroughSubject<LinkRecognition, Never>()
 
+    let textUpdated = PassthroughSubject<TextUpdate, Never>()
+
     lazy var nodeRecognizer = NodeRecognizer(target: self, action: #selector(nodeRecognition(recognizer:)))
     lazy var linkRecognizer = LinkRecognizer(target: self, action: #selector(linkRecognition(recognizer:)))
+
+    private var cancellables: [AnyCancellable] = []
 
     init() {
         super.init(frame: .zero)
@@ -174,8 +183,16 @@ extension CanvasUIView {
             x: bounds.width * CGFloat(node.fractPos.x),
             y: bounds.height * CGFloat(node.fractPos.y)
         )
+
+        view.updateText(node.title)
+
         let dragger = UIDragInteraction(delegate: self)
         view.addInteraction(dragger)
+
+        view.textUpdated.sink { [weak self] text in
+            self?.textUpdated.send(TextUpdate(text: text, nodeId: node.id))
+        }.store(in: &cancellables)
+
         addSubview(view)
         self.nodeViews.append(view)
         DispatchQueue.main.async {

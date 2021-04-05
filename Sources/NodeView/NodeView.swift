@@ -39,9 +39,12 @@ public final class NodeUIView: UIView {
             make.height.equalTo(44)
             make.center.equalToSuperview()
         }
+        field.addTarget(self, action: #selector(textChanged(textField:)), for: .editingChanged)
 
         layer.cornerRadius = 8
     }
+
+    public let textUpdated = PassthroughSubject<String?, Never>()
 
     public override func layoutSubviews() {
         super.layoutSubviews()
@@ -49,8 +52,8 @@ public final class NodeUIView: UIView {
         let w = field.bounds.width + 40
         let h = field.bounds.height + 40
         bounds = .init(x: 0, y: 0, width: w, height: h)
-
     }
+
 
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
@@ -71,6 +74,20 @@ extension NodeUIView {
             return
         }
         highlighted(true)
+    }
+}
+
+extension NodeUIView: UITextFieldDelegate {
+    public func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+    }
+
+    @objc func textChanged(textField: UITextField) {
+        textUpdated.send(textField.text)
+    }
+
+    public func updateText(_ text: String?) {
+        field.text = text
     }
 }
 

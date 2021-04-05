@@ -5,7 +5,7 @@ struct Position: Codable {
 
 struct Node: Codable {
     let id: String
-    let title: String
+    var title: String?
     let colorHex: String
     var fractPos: Position
     var linkedNodeIds: Set<String>
