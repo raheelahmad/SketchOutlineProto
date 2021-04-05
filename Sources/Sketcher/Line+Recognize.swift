@@ -8,21 +8,27 @@
 import Foundation
 import CoreGraphics
 
+extension Line.PointAngle {
+    func isAbove(_ threshold: CGFloat) -> Bool {
+        normalized > threshold
+    }
+}
+
 extension Line {
-    var boundingRect: CGRect? {
+    func anglesAboveThreshold(_ threshold: CGFloat, minorThreshold: CGFloat) -> Int {
         var currentMinorCumulative: CGFloat = 0
         var majorCount = 0
         for (idx, angle) in angles.enumerated() {
-            if angle.isMajorTurn {
+            if angle.isAbove(threshold) {
 //                ignore current one if previous two were also a major
-                if idx > 0 && angles[idx-1].isMajorTurn { continue }
-                if idx > 1 && angles[idx-2].isMajorTurn { continue }
+                if idx > 0 && angles[idx-1].isAbove(threshold) { continue }
+                if idx > 1 && angles[idx-2].isAbove(threshold) { continue }
                 majorCount += 1
-            } else if angle.isMinorTurn {
+            } else if angle.isAbove(minorThreshold) {
                 // could still have a cumulative major angle
                 currentMinorCumulative += angle.angle
                 let majorTestAngle = PointAngle(index: -1, angle: currentMinorCumulative)
-                if majorTestAngle.isMajorTurn {
+                if majorTestAngle.isAbove(threshold) {
                     majorCount += 1
                     currentMinorCumulative = 0
                 }
@@ -30,6 +36,11 @@ extension Line {
                 currentMinorCumulative = 0
             }
         }
+        return majorCount
+    }
+
+    var boundingRect: CGRect? {
+        let majorCount = anglesAboveThreshold(Line.PointAngle.majorThreshold, minorThreshold: Line.PointAngle.minorThreshold)
 
         guard majorCount == 3 else {
             return nil

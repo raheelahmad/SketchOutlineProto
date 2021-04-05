@@ -13,15 +13,10 @@ extension Line.PointAngle {
     var normalized: CGFloat {
         abs(CGFloat.pi - abs(angle)).truncatingRemainder(dividingBy: CGFloat.pi)
     }
-    var minorThreshold: CGFloat { CGFloat.pi / 4.5 }
-    var majorThreshold: CGFloat { CGFloat.pi / 9.8 }
+    static var minorThreshold: CGFloat { CGFloat.pi / 4.5 }
+    static var majorThreshold: CGFloat { CGFloat.pi / 9.8 }
+    static var megaThreshold: CGFloat { CGFloat.pi + 1.0 }
 
-    var isMajorTurn: Bool {
-        return normalized > majorThreshold
-    }
-    var isMinorTurn: Bool {
-        return normalized > minorThreshold
-    }
 }
 
 extension Line {

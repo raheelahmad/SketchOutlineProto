@@ -50,7 +50,7 @@ final class NodeRecognizer: UIGestureRecognizer {
             return
         }
         line?.points.append(location)
-        /// TODO: can inspect line's points (similar to boundingRect) to
+        /// LATER: can inspect line's points (similar to boundingRect) to
         /// check if it has failed already.
         /// E.g., if it has moved in the wrong angles (e.g., making an angle more than 180 deg)
 
@@ -60,15 +60,7 @@ final class NodeRecognizer: UIGestureRecognizer {
     }
 
     private func isPointValid(_ point: CGPoint) -> Bool {
-        for subView in (self.view?.subviews ?? []) {
-            let pointInSubview = subView.convert(point, from: self.view)
-            // should not overlap any subview
-            if subView.bounds.contains(pointInSubview) {
-                return false
-            }
-        }
-
-        return true
+        subView(at: point) == nil
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {

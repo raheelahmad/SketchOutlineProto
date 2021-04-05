@@ -10,36 +10,6 @@ import Combine
 
 import NodeView
 
-final class LinkUIView: UIView {
-    let from: NodeUIView
-    let to: NodeUIView
-    private(set) var path: UIBezierPath
-
-    init(from: NodeUIView, to: NodeUIView) {
-        self.from = from
-        self.to = to
-        self.path = Self.path(from: from, to: to)
-
-        super.init(frame: .zero)
-    }
-
-    func updatePath() {
-        self.path = Self.path(from: from, to: to)
-    }
-
-    private static func path(from: UIView, to: UIView) -> UIBezierPath {
-        let p = UIBezierPath()
-        p.move(to: from.center)
-        p.addLine(to: to.center)
-        return p
-    }
-
-    @available(*, unavailable)
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
-
 final class LinkLayer: CAShapeLayer {
     let fromId: String
     let toId: String
@@ -74,9 +44,9 @@ public final class CanvasUIView: UIView {
         }
     }
 
-    private(set) var nodes: [NodeUIView] = [] {
+    private(set) var nodeViews: [NodeUIView] = [] {
         didSet {
-            for view in nodes {
+            for view in nodeViews {
                 addSubview(view)
             }
         }
@@ -148,22 +118,21 @@ public final class CanvasUIView: UIView {
 }
 
 extension CanvasUIView {
-    func update(_ updated: [Node]) {
-        let existingNodeIds = nodes.map { $0.id }
-        let new = updated.filter { !existingNodeIds.contains($0.id) }
+    func update(_ updatedNodes: [Node]) {
+        let existingNodeIds = nodeViews.map { $0.id }
+        let new = updatedNodes.filter { !existingNodeIds.contains($0.id) }
         for newNode in new {
             addNode(for: newNode)
         }
 
-        // TODO: modified: update centers
-        // TODO: deleted:
+        // LATER: modified: update centers when we implement move
+        // LATER: deleted: after we implement delete
 
-        // TODO: links (update paths, remove, insert)
-        for node in updated {
+        for node in updatedNodes {
             for linkedNodeId in node.linkedNodeIds {
                 guard
-                    let from = nodes.first(where: { $0.id == node.id }),
-                    let to = nodes.first(where: { $0.id == linkedNodeId })
+                    let from = nodeViews.first(where: { $0.id == node.id }),
+                    let to = nodeViews.first(where: { $0.id == linkedNodeId })
                 else {
                     assertionFailure("Could not find nodes to link to")
                     continue
@@ -210,7 +179,7 @@ extension CanvasUIView {
         let dragger = UIDragInteraction(delegate: self)
         view.addInteraction(dragger)
         addSubview(view)
-        self.nodes.append(view)
+        self.nodeViews.append(view)
         DispatchQueue.main.async {
             view.activateEditing()
         }
@@ -244,15 +213,5 @@ extension CanvasUIView {
             context?.addPath(p.cgPath)
             context?.strokePath()
         }
-
-        // TODO: currently saving path in LinkUIView without drawing it there.
-        // Should just use a CALayer
-//        for link in self.links.map({ $0.path }) {
-//            context?.setStrokeColor(UIColor.systemGray3.cgColor)
-//            context?.setLineWidth(6)
-//
-//            context?.addPath(link.cgPath)
-//            context?.strokePath()
-//        }
     }
 }

@@ -81,7 +81,6 @@ public final class Sketcher: UIView {
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         setNeedsDisplay()
         currentLine.resample(atLength: 20)
-        currentLine.calculateSlopes()
         currentLine.calculateAngles()
     }
 
@@ -119,26 +118,6 @@ public final class Sketcher: UIView {
             context?.stroke(boundingRect)
         }
 
-    }
-
-    private func drawTangent(pointIndex: Int, line: Line, ctx: CGContext?) {
-        let point = line.points[pointIndex]
-        let m = line.tangent(at: pointIndex)
-
-        let path = UIBezierPath()
-        for (idx, offset) in (-120..<120).enumerated() {
-            let offsetX = CGFloat(offset)
-            let offsetY = offsetX * m
-            let tPt = CGPoint(x: point.x + offsetX, y: point.y + offsetY)
-            if idx == 0 {
-                path.move(to: tPt)
-            } else {
-                path.addLine(to: tPt)
-            }
-        }
-
-        ctx?.addPath(path.cgPath)
-        ctx?.strokePath()
     }
 }
 

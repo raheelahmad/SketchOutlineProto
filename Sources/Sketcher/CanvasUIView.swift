@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 
 public struct CanvasView: UIViewRepresentable {
+    // LATER: move to a ViewModel
     @State var nodes: [Node] = []
 
     public func makeCoordinator() -> Coordinator {

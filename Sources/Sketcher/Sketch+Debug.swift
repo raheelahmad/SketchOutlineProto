@@ -44,18 +44,18 @@ extension Sketcher {
     }
 
     func updateAngle() {
-        guard let index = tangentSliderIndex else {
-            return
-        }
-        guard let angle = currentLine.angles.first(where: { $0.index == index }) else { return }
-        angleLabel.text = String(format: "%.2f", angle.angle)
-        if angle.isMajorTurn {
-            print(String(format: "MAJOR turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
-        } else if angle.isMinorTurn {
-            print(String(format: "minor turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
-        } else {
-            print(String(format: "%.2f (%.2f | %.2f → %.2f) [%d]", angle.angle, angle.normalized, angle.minorThreshold, angle.majorThreshold, angle.index))
-        }
+//        guard let index = tangentSliderIndex else {
+//            return
+//        }
+//        guard let angle = currentLine.angles.first(where: { $0.index == index }) else { return }
+//        angleLabel.text = String(format: "%.2f", angle.angle)
+//        if angle.isMajorTurn {
+//            print(String(format: "MAJOR turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
+//        } else if angle.isMinorTurn {
+//            print(String(format: "minor turn at %.2f (%.2f) [%d]", angle.angle, angle.normalized, angle.index))
+//        } else {
+//            print(String(format: "%.2f (%.2f | %.2f → %.2f) [%d]", angle.angle, angle.normalized, angle.minorThreshold, angle.majorThreshold, angle.index))
+//        }
     }
 
 }

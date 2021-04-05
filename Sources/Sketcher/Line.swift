@@ -23,11 +23,8 @@ struct Line {
     }
 
     let id: String
-    var points: [CGPoint] {
-        didSet { calculateSlopes() }
-    }
+    var points: [CGPoint]
 
-    var slopes: [PointSlope] = []
     var angles: [PointAngle] = []
 }
 

@@ -67,21 +67,6 @@ final class LinkRecognizer: UIGestureRecognizer {
         return subView(at: point) != nil
     }
 
-    // TODO: could be an extension of GR
-    private func subView(at point: CGPoint) -> NodeUIView? {
-        // TODO: use map
-        let subViews = (self.view?.subviews ?? []).compactMap { $0 as? NodeUIView }
-        for subView in subViews {
-            let pointInSubview = subView.convert(point, from: self.view)
-            // should not overlap any subview
-            if subView.bounds.contains(pointInSubview) {
-                return subView
-            }
-        }
-
-        return nil
-    }
-
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesEnded(touches, with: event)
         guard let touch = touches.first, touch == trackedTouch else {
@@ -107,4 +92,20 @@ final class LinkRecognizer: UIGestureRecognizer {
         trackedTouch = nil
         line = nil
     }
+}
+
+extension UIGestureRecognizer {
+    func subView(at point: CGPoint) -> NodeUIView? {
+        let subViews = (self.view?.subviews ?? []).compactMap { $0 as? NodeUIView }
+        for subView in subViews {
+            let pointInSubview = subView.convert(point, from: self.view)
+            // should not overlap any subview
+            if subView.bounds.contains(pointInSubview) {
+                return subView
+            }
+        }
+
+        return nil
+    }
+
 }
