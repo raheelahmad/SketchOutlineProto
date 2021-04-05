@@ -191,6 +191,7 @@ extension CanvasUIView {
         let mid = from.center.midPoint(between: to.center)
         var mid1 = from.center.midPoint(between: mid)
         var mid2 = mid.midPoint(between: to.center)
+        // somewhat random
         mid1.y -= 30
         mid2.y -= 30
         p.addCurve(to: to.center, controlPoint1: mid1, controlPoint2: mid2)

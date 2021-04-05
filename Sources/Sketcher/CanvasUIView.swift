@@ -24,66 +24,23 @@ public struct CanvasView: UIViewRepresentable {
         }
 
         func bindRecognizers(canvasView: CanvasUIView) {
-            // TODO: both these can be factored out as reducers:
-            // reduceNodeRecognition: inout [Node], recognition: NodeRecognition
-            // reduceLinkRecognition: inout [Node], recognition: LinkRecognition
             canvasView.nodeRecognized
                 .sink { [weak self] recognition in
                     guard let self = self else { return }
-
-                    let posX =  recognition.center.x / canvasView.bounds.width
-                    let posY = recognition.center.y / canvasView.bounds.height
-                    let node = Node(
-                        id: UUID().uuidString,
-                        title: "",
-                        colorHex: "8312A8",
-                        fractPos: .init(x: Double(posX), y: Double(posY)),
-                        linkedNodeIds: []
+                    NodesReducer.nodeRecognition(
+                        nodes: &self.view.nodes,
+                        parentBounds: canvasView.bounds,
+                        recognition: recognition
                     )
-                    self.view.nodes.append(node)
                 }.store(in: &cancellables)
 
             canvasView.linkRecognized.sink { [weak self] linkRecognition in
                 guard let self = self else { return }
-                var nodes = self.view.nodes
-
-                switch linkRecognition {
-                case .fromTo(let fromNodeId, let toNodeId):
-                    guard
-                        let fromNodeIndex = nodes.firstIndex(where: { $0.id == fromNodeId }),
-                        nodes.contains(where: { $0.id == toNodeId })
-                    else {
-                        assertionFailure("Could not find nodes")
-                        return
-                    }
-
-                    var fromNode = nodes[fromNodeIndex]
-                    fromNode.linkedNodeIds.insert(toNodeId)
-                    nodes[fromNodeIndex] = fromNode
-                case let .onlyFrom(fromNodeId, to):
-                    guard
-                        let fromNodeIndex = nodes.firstIndex(where: { $0.id == fromNodeId })
-                    else {
-                        assertionFailure("Could not find node")
-                        return
-                    }
-
-                    let posX =  to.x / canvasView.bounds.width
-                    let posY = to.y / canvasView.bounds.height
-                    var fromNode = nodes[fromNodeIndex]
-                    let toNode = Node(
-                        id: UUID().uuidString,
-                        title: "",
-                        colorHex: "8218AD",
-                        fractPos: .init(x: Double(posX), y: Double(posY)),
-                        linkedNodeIds: []
-                    )
-                    fromNode.linkedNodeIds.insert(toNode.id)
-                    nodes.append(toNode)
-                    nodes[fromNodeIndex] = fromNode
-                }
-
-                self.view.nodes = nodes
+                NodesReducer.linkRecognition(
+                    nodes: &self.view.nodes,
+                    parentBounds: canvasView.bounds,
+                    recognition: linkRecognition
+                )
             }.store(in: &cancellables)
         }
     }
