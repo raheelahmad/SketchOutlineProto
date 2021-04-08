@@ -108,7 +108,7 @@ public final class CanvasUIView: UIView {
                 continue
             }
 
-            updateLinkPath(from: from, to: to, layer: link)
+            link.updateLinkPath(from: from, to: to)
         }
     }
 }
@@ -143,24 +143,11 @@ extension CanvasUIView {
                     linkLayer = newLinkLayer
                 }
 
-                updateLinkPath(from: from, to: to, layer: linkLayer)
+                linkLayer.updateLinkPath(from: from, to: to)
             }
         }
 
         setNeedsDisplay()
-    }
-
-    private func updateLinkPath(from: NodeUIView, to: NodeUIView, layer: LinkLayer) {
-        let p = UIBezierPath()
-
-        let (fromP, toP) = CGRect.linkPoints(from: from.frame, to: to.frame)
-        p.move(to: fromP)
-        let (m1, m2) = CGPoint.controlPoints(between: fromP, and: toP)
-        p.addCurve(to: toP, controlPoint1: m1, controlPoint2: m2)
-        p.addLine(to: m2)
-//        p.move(to: toP)
-//        p.addLine(to: CGPoint(x: toP.x + 3, y: toP.y + 10))
-        layer.path = p.cgPath
     }
 }
 
