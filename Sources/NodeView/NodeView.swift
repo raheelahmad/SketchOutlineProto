@@ -25,7 +25,7 @@ public final class NodeUIView: UIView {
 
     let field: UITextField = {
         let field = UITextField()
-        field.placeholder = "Text"
+        field.placeholder = "Title"
         field.textAlignment = .center
         field.font = .systemFont(ofSize: 14, weight: .semibold)
         field.textColor = .white

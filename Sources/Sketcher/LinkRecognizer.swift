@@ -54,10 +54,8 @@ final class LinkRecognizer: UIGestureRecognizer {
         let location = self.location(in: view)
         line?.points.append(location)
 
-        if state != .changed {
-            if let length = line?.length, length > 10 {
-                state = .began
-            }
+        if state != .changed, isLineValid {
+            state = .began
         } else {
             state = .changed
         }
@@ -70,6 +68,10 @@ final class LinkRecognizer: UIGestureRecognizer {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
         super.touchesEnded(touches, with: event)
         guard let touch = touches.first, touch == trackedTouch else {
+            state = .failed
+            return
+        }
+        guard isLineValid else {
             state = .failed
             return
         }
@@ -91,6 +93,14 @@ final class LinkRecognizer: UIGestureRecognizer {
     private func _reset() {
         trackedTouch = nil
         line = nil
+    }
+
+    private var isLineValid: Bool {
+        if let length = line?.length, length > 10 {
+            return true
+        } else {
+            return false
+        }
     }
 }
 

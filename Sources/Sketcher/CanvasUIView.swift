@@ -10,33 +10,6 @@ import Combine
 
 import NodeView
 
-final class LinkLayer: CAShapeLayer {
-    let fromId: String
-    let toId: String
-
-    init(fromId: String, toId: String) {
-        self.fromId = fromId
-        self.toId = toId
-
-        super.init()
-
-        self.strokeColor = UIColor.hex(0xB2B7BB).cgColor
-        self.lineWidth = 3
-        self.fillColor = UIColor.clear.cgColor
-    }
-
-    required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-}
-
-struct NodeRecognition {
-    let center: CGPoint
-}
-
-enum LinkRecognition {
-    case onlyFrom(fromNodeId: String, to: CGPoint)
-    case fromTo(fromNodeId: String, toNodeId: String)
-}
-
 struct TextUpdate {
     let text: String?
     let nodeId: String
@@ -184,6 +157,9 @@ extension CanvasUIView {
         p.move(to: fromP)
         let (m1, m2) = CGPoint.controlPoints(between: fromP, and: toP)
         p.addCurve(to: toP, controlPoint1: m1, controlPoint2: m2)
+        p.addLine(to: m2)
+//        p.move(to: toP)
+//        p.addLine(to: CGPoint(x: toP.x + 3, y: toP.y + 10))
         layer.path = p.cgPath
     }
 }

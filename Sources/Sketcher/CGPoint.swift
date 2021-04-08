@@ -30,8 +30,8 @@ extension CGPoint {
             position = .downAndRight
         }
 
-        let halfX = abs(b.x - a.x)/2.0
-        let halfY = abs(b.y - a.y)/2.0
+        let halfX = abs(b.x - a.x)/3.0
+        let halfY = abs(b.y - a.y)/3.0
 
         switch position {
         case .upAndLeft:
