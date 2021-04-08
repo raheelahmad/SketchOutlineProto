@@ -20,8 +20,8 @@ final class LinkLayer: CAShapeLayer {
 
         super.init()
 
-        self.strokeColor = UIColor.red.cgColor
-        self.lineWidth = 6
+        self.strokeColor = UIColor.hex(0xB2B7BB).cgColor
+        self.lineWidth = 3
         self.fillColor = UIColor.clear.cgColor
     }
 
@@ -122,6 +122,22 @@ public final class CanvasUIView: UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+
+        for link in links {
+            guard
+                let from = nodeViews.first(where: { $0.id == link.fromId }),
+                let to = nodeViews.first(where: { $0.id == link.toId })
+            else {
+                assertionFailure("Could not find nodes for links")
+                continue
+            }
+
+            updateLinkPath(from: from, to: to, layer: link)
+        }
+    }
 }
 
 extension CanvasUIView {
@@ -163,14 +179,11 @@ extension CanvasUIView {
 
     private func updateLinkPath(from: NodeUIView, to: NodeUIView, layer: LinkLayer) {
         let p = UIBezierPath()
-        p.move(to: from.center)
-        let mid = from.center.midPoint(between: to.center)
-        var mid1 = from.center.midPoint(between: mid)
-        var mid2 = mid.midPoint(between: to.center)
-        // somewhat random
-        mid1.y -= 30
-        mid2.y -= 30
-        p.addCurve(to: to.center, controlPoint1: mid1, controlPoint2: mid2)
+
+        let (fromP, toP) = CGRect.linkPoints(from: from.frame, to: to.frame)
+        p.move(to: fromP)
+        let (m1, m2) = CGPoint.controlPoints(between: fromP, and: toP)
+        p.addCurve(to: toP, controlPoint1: m1, controlPoint2: m2)
         layer.path = p.cgPath
     }
 }
@@ -184,7 +197,10 @@ extension CanvasUIView {
             y: bounds.height * CGFloat(node.fractPos.y)
         )
 
+        let color = UInt(node.colorHex, radix: 16).map { UIColor.hex($0) }
+
         view.updateText(node.title)
+        view.updateColor(color)
 
         let dragger = UIDragInteraction(delegate: self)
         view.addInteraction(dragger)
@@ -195,9 +211,10 @@ extension CanvasUIView {
 
         addSubview(view)
         self.nodeViews.append(view)
-        DispatchQueue.main.async {
-            view.activateEditing()
-        }
+        // LATER: only activate if a new node, and not just adding initial nodes
+//        DispatchQueue.main.async {
+//            view.activateEditing()
+//        }
         return view
     }
 }
@@ -211,7 +228,8 @@ extension CanvasUIView: UIDragInteractionDelegate {
 extension CanvasUIView {
     public override func draw(_ rect: CGRect) {
         let context = UIGraphicsGetCurrentContext()
-        context?.setFillColor(UIColor.white.cgColor)
+        let color = UIColor.hex(0xEDE0E0)
+        context?.setFillColor(color.cgColor)
         context?.fill(rect)
 
         // Draw any in-progress paths

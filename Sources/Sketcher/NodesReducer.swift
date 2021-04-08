@@ -26,16 +26,9 @@ final class NodesReducer {
                 return
             }
 
-            let posX =  to.x / parentBounds.width
-            let posY = to.y / parentBounds.height
+            let toNode = newNode(at: to, parentBounds: parentBounds)
             var fromNode = updatedNodes[fromNodeIndex]
-            let toNode = Node(
-                id: UUID().uuidString,
-                title: "",
-                colorHex: "8218AD",
-                fractPos: .init(x: Double(posX), y: Double(posY)),
-                linkedNodeIds: []
-            )
+
             fromNode.linkedNodeIds.insert(toNode.id)
             updatedNodes.append(toNode)
             updatedNodes[fromNodeIndex] = fromNode
@@ -45,16 +38,23 @@ final class NodesReducer {
     }
 
     static func nodeRecognition(nodes: inout [Node], parentBounds: CGRect, recognition: NodeRecognition) {
-        let posX =  recognition.center.x / parentBounds.width
-        let posY = recognition.center.y / parentBounds.height
+        let node = newNode(at: recognition.center, parentBounds: parentBounds)
+        nodes.append(node)
+    }
+
+    private static func newNode(at point: CGPoint, parentBounds: CGRect) -> Node {
+        let posX =  point.x / parentBounds.width
+        let posY = point.y / parentBounds.height
+
+        let colorHex = ["454440", "409D8F", "F92943", "F3C6B8"].randomElement()!
         let node = Node(
             id: UUID().uuidString,
             title: "",
-            colorHex: "8312A8",
+            colorHex: colorHex,
             fractPos: .init(x: Double(posX), y: Double(posY)),
             linkedNodeIds: []
         )
-        nodes.append(node)
+        return node
     }
 
     static func updateText(nodes: inout [Node], update: TextUpdate) {

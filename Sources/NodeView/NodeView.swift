@@ -20,40 +20,33 @@ struct NodeView: UIViewRepresentable {
 }
 
 public final class NodeUIView: UIView {
+    public static var baseSize: CGSize = .init(width: 160, height: 60)
     public let id: String
 
     let field: UITextField = {
         let field = UITextField()
         field.placeholder = "Text"
-        field.textColor = .systemGray6
+        field.textAlignment = .center
+        field.font = .systemFont(ofSize: 14, weight: .semibold)
+        field.textColor = .white
         return field
     }()
 
     public init(id: String) {
         self.id = id
-        super.init(frame: .zero)
-        backgroundColor = [UIColor.hex(0x454440), UIColor.hex(0x409D8F), UIColor.hex(0xF92943)].randomElement()!
+        super.init(frame: .init(origin: .zero, size: Self.baseSize))
         addSubview(field)
         field.snp.makeConstraints { make in
-            make.width.equalTo(120)
-            make.height.equalTo(44)
-            make.center.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(M.Sp.X.small)
+            make.top.bottom.equalToSuperview().inset(M.Sp.Y.small)
         }
         field.addTarget(self, action: #selector(textChanged(textField:)), for: .editingChanged)
 
-        layer.cornerRadius = 8
+        layer.cornerRadius = 12
+        layer.cornerCurve = .continuous
     }
 
     public let textUpdated = PassthroughSubject<String?, Never>()
-
-    public override func layoutSubviews() {
-        super.layoutSubviews()
-
-        let w = field.bounds.width + 40
-        let h = field.bounds.height + 40
-        bounds = .init(x: 0, y: 0, width: w, height: h)
-    }
-
 
     required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
@@ -88,6 +81,10 @@ extension NodeUIView: UITextFieldDelegate {
 
     public func updateText(_ text: String?) {
         field.text = text
+    }
+
+    public func updateColor(_ color: UIColor?) {
+        backgroundColor = color
     }
 }
 
