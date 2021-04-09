@@ -26,6 +26,7 @@ struct TextUpdate {
 }
 
 public final class CanvasUIView: UIView {
+    private let model: CanvasViewModel
     var currentLine: Line? = nil {
         didSet {
             setNeedsDisplay()
@@ -61,11 +62,17 @@ public final class CanvasUIView: UIView {
 
     private var cancellables: [AnyCancellable] = []
 
-    init() {
+    init(model: CanvasViewModel) {
+        self.model = model
         super.init(frame: .zero)
 
         addGestureRecognizer(nodeRecognizer)
         addGestureRecognizer(linkRecognizer)
+        model.$autolayout
+            .sink { [weak self] autoLayout in
+                guard autoLayout, let self = self else { return }
+                print("autolayout")
+            }.store(in: &cancellables)
     }
 
     @objc

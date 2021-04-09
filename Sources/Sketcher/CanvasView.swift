@@ -77,18 +77,26 @@ public final class Coordinator {
     }
 }
 
+public final class CanvasViewModel: ObservableObject {
+    @Published public var autolayout = false
+    public init() {}
+}
+
 public struct CanvasView: UIViewRepresentable {
     // LATER: move to a ViewModel
     @State var nodes: [Node] = []
+    @ObservedObject var model: CanvasViewModel
 
     public func makeCoordinator() -> Coordinator {
         Coordinator(view: self)
     }
 
-    public init() {}
+    public init(model: CanvasViewModel) {
+        self.model = model
+    }
 
     public func makeUIView(context: Context) -> CanvasUIView {
-        let view = CanvasUIView()
+        let view = CanvasUIView(model: model)
         context.coordinator.bindRecognizers(canvasView: view)
         return view
     }
@@ -100,7 +108,7 @@ public struct CanvasView: UIViewRepresentable {
 
 struct SwiftUIView_Previews: PreviewProvider {
     static var previews: some View {
-        CanvasView()
+        CanvasView(model: CanvasViewModel())
     }
 }
 

@@ -6,13 +6,21 @@
 //
 
 import SwiftUI
+import SketchStatusView
 import Sketcher
+
+let canvasModel = CanvasViewModel()
 
 @main
 struct SketchDemoApp: App {
     var body: some Scene {
         WindowGroup {
-            CanvasView()
+            ZStack(alignment: .topTrailing) {
+                CanvasView(model: canvasModel)
+                SketchStatusView.SketchMenuView(items: [.init(title: "Auto layout", imageName: "perspective")]) { selection in
+                    canvasModel.autolayout = true
+                }
+            }
         }
     }
 }

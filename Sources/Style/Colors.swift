@@ -8,15 +8,19 @@
 import SwiftUI
 
 extension Color {
-    public static var primaryBackground: Color {
-        Color(UIColor.primaryBackground)
-    }
+    public static var primaryBackground: Color { Color(UIColor.primaryBackground) }
+
+    public static var gray0105: Color { Color(UIColor.gray0105) }
+
+    public static var blueMed: Color { Color(UIColor.blueMed) }
 }
 
 extension UIColor {
-    public static var primaryBackground: UIColor {
-        hex(0xE0DDF5)
-    }
+    public static var primaryBackground: UIColor { hex(0xE0DDF5) }
+
+    public static var gray0105: UIColor { hex(0xEBEBEB) }
+
+    public static var blueMed: UIColor { hex(0x6C8FB8) }
 }
 
 extension Gradient {

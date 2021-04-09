@@ -9,7 +9,7 @@ final class CanvasViewController: UIViewController {
         }
     }
 
-    lazy var canvasView = CanvasUIView()
+    lazy var canvasView = CanvasUIView(model: CanvasViewModel())
 
     private var cancellables: [AnyCancellable] = []
 
