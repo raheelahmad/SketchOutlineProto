@@ -10,6 +10,16 @@ import Combine
 
 import NodeView
 
+struct NodeUpdate {
+    enum Kind {
+        case text(String?)
+        case position(Position)
+    }
+
+    let kind: Kind
+    let id: String
+}
+
 struct TextUpdate {
     let text: String?
     let nodeId: String
@@ -42,7 +52,9 @@ public final class CanvasUIView: UIView {
     let nodeRecognized = PassthroughSubject<NodeRecognition, Never>()
     let linkRecognized = PassthroughSubject<LinkRecognition, Never>()
 
-    let textUpdated = PassthroughSubject<TextUpdate, Never>()
+    let textUpdated = PassthroughSubject<NodeUpdate, Never>()
+
+    var currentDraggedNodeOffsetFromCenter: CGPoint?
 
     lazy var nodeRecognizer = NodeRecognizer(target: self, action: #selector(nodeRecognition(recognizer:)))
     lazy var linkRecognizer = LinkRecognizer(target: self, action: #selector(linkRecognition(recognizer:)))
@@ -167,9 +179,11 @@ extension CanvasUIView {
 
         let dragger = UIDragInteraction(delegate: self)
         view.addInteraction(dragger)
+        let dropInteraction = UIDropInteraction(delegate: self)
+        addInteraction(dropInteraction)
 
         view.textUpdated.sink { [weak self] text in
-            self?.textUpdated.send(TextUpdate(text: text, nodeId: node.id))
+            self?.textUpdated.send(NodeUpdate(kind: .text(text), id: node.id))
         }.store(in: &cancellables)
 
         addSubview(view)
@@ -182,9 +196,43 @@ extension CanvasUIView {
     }
 }
 
-extension CanvasUIView: UIDragInteractionDelegate {
+extension CanvasUIView: UIDragInteractionDelegate, UIDropInteractionDelegate {
     public func dragInteraction(_ interaction: UIDragInteraction, itemsForBeginning session: UIDragSession) -> [UIDragItem] {
-        [UIDragItem(itemProvider: NSItemProvider())]
+        guard let nodeView = interaction.view as? NodeUIView else {
+            return []
+        }
+
+        let locationInNode = session.location(in: nodeView)
+        let offset = CGPoint(x: locationInNode.x - nodeView.bounds.midX, y: locationInNode.y - nodeView.bounds.midY)
+        self.currentDraggedNodeOffsetFromCenter = offset
+
+        let provider = NSItemProvider(item: nodeView.id as NSString, typeIdentifier: "node")
+        return [UIDragItem(itemProvider: provider)]
+    }
+
+    public func dragInteraction(_ interaction: UIDragInteraction, previewForLifting item: UIDragItem, session: UIDragSession) -> UITargetedDragPreview? {
+        guard let nodeView = interaction.view as? NodeUIView else {
+            return nil
+        }
+        return UITargetedDragPreview(view: nodeView, parameters: UIPreviewParameters())
+    }
+
+    public func dragInteraction(_ interaction: UIDragInteraction, sessionDidMove session: UIDragSession) {
+        guard let nodeView = interaction.view as? NodeUIView else {
+            return
+        }
+
+        var loc = session.location(in: self)
+        if let offset = currentDraggedNodeOffsetFromCenter {
+            loc.x -= offset.x
+            loc.y -= offset.y
+        }
+        let pos = Position(x: Double(loc.x/bounds.width), y: Double(loc.y/bounds.height))
+        textUpdated.send(NodeUpdate(kind: .position(pos), id: nodeView.id))
+        nodeView.center = loc
+    }
+
+    public func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
     }
 }
 

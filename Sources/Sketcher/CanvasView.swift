@@ -51,7 +51,7 @@ public final class Coordinator {
             .sink { [weak self] update in
                 guard let self = self else { return }
 
-                NodesReducer.updateText(nodes: &self.view.nodes, update: update)
+                NodesReducer.updateNode(nodes: &self.view.nodes, update: update)
                 self.save()
             }.store(in: &cancellables)
     }

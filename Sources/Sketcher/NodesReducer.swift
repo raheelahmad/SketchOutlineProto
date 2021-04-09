@@ -57,12 +57,17 @@ final class NodesReducer {
         return node
     }
 
-    static func updateText(nodes: inout [Node], update: TextUpdate) {
-        guard let nodeIndex = nodes.firstIndex(where: { $0.id == update.nodeId }) else {
+    static func updateNode(nodes: inout [Node], update: NodeUpdate) {
+        guard let nodeIndex = nodes.firstIndex(where: { $0.id == update.id }) else {
             assertionFailure("Could not find node after text update")
             return
         }
 
-        nodes[nodeIndex].title = update.text
+        switch update.kind {
+        case .position(let pos):
+            nodes[nodeIndex].fractPos = pos
+        case .text(let text):
+            nodes[nodeIndex].title = text
+        }
     }
 }

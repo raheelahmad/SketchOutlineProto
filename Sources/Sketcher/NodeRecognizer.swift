@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import NodeView
 
 final class NodeRecognizer: UIGestureRecognizer {
     private(set) var line: Line?
@@ -56,11 +57,24 @@ final class NodeRecognizer: UIGestureRecognizer {
 
         // even though this is a discrete GR (recognized at the end only), setting changed allows the state to be sent
         // to the target continuously, which it needs to build the node outline.
-        state = .changed
+
+        if !isLineValid {
+            state = .began
+        } else {
+            state = .changed
+        }
     }
 
     private func isPointValid(_ point: CGPoint) -> Bool {
         subView(at: point) == nil
+    }
+
+    private var isLineValid: Bool {
+        if let length = line?.length, length > NodeUIView.baseSize.width {
+            return true
+        } else {
+            return false
+        }
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
