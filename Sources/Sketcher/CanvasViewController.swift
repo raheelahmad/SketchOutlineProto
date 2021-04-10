@@ -2,6 +2,8 @@ import UIKit
 import Combine
 import SnapKit
 
+import Models
+
 final class CanvasViewController: UIViewController {
     private var nodes: [Node] = [] {
         didSet {

@@ -1,4 +1,5 @@
 import NodeView
+import Models
 import Foundation
 import CoreGraphics
 

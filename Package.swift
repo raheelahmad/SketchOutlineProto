@@ -24,13 +24,17 @@ let package = Package(
             dependencies: [.target(name: "Style"),]),
         .target(
             name: "NodeView",
-            dependencies: [.target(name: "Style"), "SnapKit"]),
-//
+            dependencies: [.target(name: "Style"), .target(name: "Models"), "SnapKit"]),
         .target(
             name: "Sketcher",
-            dependencies: [.target(name: "Style"), .target(name: "NodeView")]),
+            dependencies: [.target(name: "Style"), .target(name: "Models"), .target(name: "NodeView")]),
         .target(
             name: "Style",
             dependencies: []),
+        .target(
+            name: "Models",
+            dependencies: []),
+
+        .testTarget(name: "SketcherTests", dependencies: ["Sketcher"])
     ]
 )

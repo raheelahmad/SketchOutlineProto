@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Models
 import Combine
 
 public final class Coordinator {

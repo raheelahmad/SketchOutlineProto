@@ -9,6 +9,7 @@ import SwiftUI
 import Combine
 
 import NodeView
+import Models
 
 struct NodeUpdate {
     enum Kind {
