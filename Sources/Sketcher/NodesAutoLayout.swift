@@ -2,19 +2,13 @@ import CoreGraphics
 import NodeView
 import Models
 
-protocol LayoutNode {
-    var id: String { get }
-    var childNodeIds: Set<String> { get }
-    var fractPos: Position { get set }
-}
-
-extension Node: LayoutNode {
+extension Node {
     var childNodeIds: Set<String> { linkedNodeIds }
 }
 
 struct LayoutNodeSiblings: CustomDebugStringConvertible {
     let parentId: String?
-    var siblings: [LayoutNode]
+    var siblings: [Node]
 
     var debugDescription: String {
         "parentId: \(parentId ?? ""), siblingIds: \(siblings.map {$0.id}.joined(separator: " "))"
@@ -33,27 +27,27 @@ class NodesAutoLayout {
 
     }
 
-    static func layout(nodes: inout [LayoutNode], m: Metrics) {
+    static func layout(nodes: inout [Node], m: Metrics) {
         var tree = self.tree(from: nodes)
 
-        var x: CGFloat = m.interSiblingsSpacing
-        var y: CGFloat = m.rowSpacing
+        var x: CGFloat = m.nodeSize.width / 2.0
+        var y: CGFloat = 1 - m.nodeSize.height/2
 
-        for (levelIdx, var level) in tree.enumerated() {
+        for (levelIdx, var level) in tree.enumerated().reversed() {
             for (groupIdx, var siblingGroup) in level.enumerated() {
                 for (siblingIdx, var sibling) in siblingGroup.siblings.enumerated() {
                     sibling.fractPos = Position(x: Double(x), y: Double(y))
                     siblingGroup.siblings[siblingIdx] = sibling
-                    x += m.nodeSpacingX
+                    x += m.nodeSpacingX + m.nodeSize.width
                 }
 
-                x += m.interSiblingsSpacing
+                x += m.interSiblingsSpacing + m.nodeSize.width
 
                 level[groupIdx] = siblingGroup
             }
 
-            y += (m.nodeSize.height + m.nodeSpacingY)
-            x = 0
+            y -= (m.nodeSize.height + m.rowSpacing)
+            x = m.nodeSize.width / 2.0
             tree[levelIdx] = level
         }
 
@@ -67,8 +61,8 @@ class NodesAutoLayout {
         }
     }
 
-    static func tree(from nodes: [LayoutNode]) -> [[LayoutNodeSiblings]] {
-        func findChildren(node: LayoutNode) -> LayoutNodeSiblings {
+    static func tree(from nodes: [Node]) -> [[LayoutNodeSiblings]] {
+        func findChildren(node: Node) -> LayoutNodeSiblings {
             let children = nodes.filter { node.childNodeIds.contains($0.id) }
             return LayoutNodeSiblings(parentId: node.id, siblings: children)
         }
@@ -83,10 +77,11 @@ class NodesAutoLayout {
         while !rootNodes.isEmpty {
             let siblings = rootNodes.map { findChildren(node: $0) }
             rootNodeSiblings.append(siblings)
-            rootNodes = siblings
+            let nextRootNodes = siblings
                 .flatMap { $0.siblings
                     .filter { node in !node.childNodeIds.isEmpty } // only include non-leaf nodes as next root node
                 }
+            rootNodes = nextRootNodes
         }
 
         return rootNodeSiblings

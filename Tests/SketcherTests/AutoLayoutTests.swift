@@ -85,10 +85,8 @@ final class AutoLayoutTests: XCTestCase {
         }
     }
 
-    struct Node: LayoutNode {
-        let id: String
-        let childNodeIds: Set<String>
-        var fractPos: Position
+    extension Node {
+        init(id: String, childNodesIds: )
     }
 
     private func nodes() -> [Node] {

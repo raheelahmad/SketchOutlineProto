@@ -69,11 +69,6 @@ public final class CanvasUIView: UIView {
 
         addGestureRecognizer(nodeRecognizer)
         addGestureRecognizer(linkRecognizer)
-        model.$autolayout
-            .sink { [weak self] autoLayout in
-                guard autoLayout, let self = self else { return }
-                print("autolayout")
-            }.store(in: &cancellables)
     }
 
     @objc
@@ -138,13 +133,16 @@ extension CanvasUIView {
         let existingNodeIds = nodeViews.map { $0.id }
         let new = updatedNodes.filter { !existingNodeIds.contains($0.id) }
         for newNode in new {
-            addNode(for: newNode)
+            addNode(for: newNode, alsoUpdate: false) // will be updated below
         }
 
         // LATER: modified: update centers when we implement move
         // LATER: deleted: after we implement delete
 
         for node in updatedNodes {
+            if let view = nodeViews.first(where: { $0.id == node.id }) {
+                updateNodeView(view, with: node)
+            }
             for linkedNodeId in node.linkedNodeIds {
                 guard
                     let from = nodeViews.first(where: { $0.id == node.id }),
@@ -173,17 +171,11 @@ extension CanvasUIView {
 
 extension CanvasUIView {
     @discardableResult
-    private func addNode(for node: Node) -> NodeUIView {
+    private func addNode(for node: Node, alsoUpdate: Bool = true) -> NodeUIView {
         let view = NodeUIView(id: node.id)
-        view.center = .init(
-            x: bounds.width * CGFloat(node.fractPos.x),
-            y: bounds.height * CGFloat(node.fractPos.y)
-        )
-
-        let color = UInt(node.colorHex, radix: 16).map { UIColor.hex($0) }
-
-        view.updateText(node.title)
-        view.updateColor(color)
+        if alsoUpdate {
+            updateNodeView(view, with: node)
+        }
 
         let dragger = UIDragInteraction(delegate: self)
         view.addInteraction(dragger)
@@ -201,6 +193,19 @@ extension CanvasUIView {
 //            view.activateEditing()
 //        }
         return view
+    }
+
+    private func updateNodeView(_ view: NodeUIView, with node: Node) {
+        view.center = .init(
+            x: bounds.width * CGFloat(node.fractPos.x),
+            y: bounds.height * CGFloat(node.fractPos.y)
+        )
+        print("\(node.title) at \(view.center)")
+
+        let color = UInt(node.colorHex, radix: 16).map { UIColor.hex($0) }
+
+        view.updateText(node.title)
+        view.updateColor(color)
     }
 }
 

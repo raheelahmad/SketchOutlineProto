@@ -17,7 +17,7 @@ public final class Coordinator {
         self.view = view
         DispatchQueue.main.async {
             do {
-                view.nodes = try self.read()
+                view.model.nodes = try self.read()
             }
             catch { assertionFailure("Error reading \(error.localizedDescription)") }
         }
@@ -28,7 +28,7 @@ public final class Coordinator {
             .sink { [weak self] recognition in
                 guard let self = self else { return }
                 NodesReducer.nodeRecognition(
-                    nodes: &self.view.nodes,
+                    nodes: &self.view.model.nodes,
                     parentBounds: canvasView.bounds,
                     recognition: recognition
                 )
@@ -39,7 +39,7 @@ public final class Coordinator {
         canvasView.linkRecognized.sink { [weak self] linkRecognition in
             guard let self = self else { return }
             NodesReducer.linkRecognition(
-                nodes: &self.view.nodes,
+                nodes: &self.view.model.nodes,
                 parentBounds: canvasView.bounds,
                 recognition: linkRecognition
             )
@@ -52,13 +52,13 @@ public final class Coordinator {
             .sink { [weak self] update in
                 guard let self = self else { return }
 
-                NodesReducer.updateNode(nodes: &self.view.nodes, update: update)
+                NodesReducer.updateNode(nodes: &self.view.model.nodes, update: update)
                 self.save()
             }.store(in: &cancellables)
     }
 
     private func save() {
-        do { try self.write(self.view.nodes) }
+        do { try self.write(self.view.model.nodes) }
         catch { assertionFailure("Error saving \(error.localizedDescription)") }
     }
 
@@ -79,13 +79,25 @@ public final class Coordinator {
 }
 
 public final class CanvasViewModel: ObservableObject {
+    @Published var nodes: [Node] = []
     @Published public var autolayout = false
-    public init() {}
+
+    private var cancellables: [AnyCancellable] = []
+
+    public init() {
+
+        $autolayout
+            .sink { [weak self] autoLayout in
+                guard autoLayout, let self = self else { return }
+                NodesAutoLayout.layout(
+                    nodes: &self.nodes,
+                    m: NodesAutoLayout.Metrics(nodeSize: CGSize(width: 0.12, height: 0.1), nodeSpacingX: 0.01, nodeSpacingY: 0.02, interSiblingsSpacing: 0.01, rowSpacing: 0.01)
+                )
+            }.store(in: &cancellables)
+    }
 }
 
 public struct CanvasView: UIViewRepresentable {
-    // LATER: move to a ViewModel
-    @State var nodes: [Node] = []
     @ObservedObject var model: CanvasViewModel
 
     public func makeCoordinator() -> Coordinator {
@@ -103,7 +115,7 @@ public struct CanvasView: UIViewRepresentable {
     }
 
     public func updateUIView(_ uiView: CanvasUIView, context: Context) {
-        uiView.update(nodes)
+        uiView.update(model.nodes)
     }
 }
 
