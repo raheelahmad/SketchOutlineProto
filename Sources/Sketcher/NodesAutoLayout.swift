@@ -14,7 +14,7 @@ extension Node: LayoutNode {
 
 struct LayoutNodeSiblings: CustomDebugStringConvertible {
     let parentId: String?
-    let siblings: [LayoutNode]
+    var siblings: [LayoutNode]
 
     var debugDescription: String {
         "parentId: \(parentId ?? ""), siblingIds: \(siblings.map {$0.id}.joined(separator: " "))"
@@ -33,8 +33,38 @@ class NodesAutoLayout {
 
     }
 
-    static func layout(nodes: [LayoutNode], m: Metrics) {
+    static func layout(nodes: inout [LayoutNode], m: Metrics) {
+        var tree = self.tree(from: nodes)
 
+        var x: CGFloat = m.interSiblingsSpacing
+        var y: CGFloat = m.rowSpacing
+
+        for (levelIdx, var level) in tree.enumerated() {
+            for (groupIdx, var siblingGroup) in level.enumerated() {
+                for (siblingIdx, var sibling) in siblingGroup.siblings.enumerated() {
+                    sibling.fractPos = Position(x: Double(x), y: Double(y))
+                    siblingGroup.siblings[siblingIdx] = sibling
+                    x += m.nodeSpacingX
+                }
+
+                x += m.interSiblingsSpacing
+
+                level[groupIdx] = siblingGroup
+            }
+
+            y += (m.nodeSize.height + m.nodeSpacingY)
+            x = 0
+            tree[levelIdx] = level
+        }
+
+        for treeItem in tree {
+            for siblings in treeItem.map({ $0.siblings}) {
+                for node in siblings {
+                    let idx = nodes.firstIndex(where: { $0.id == node.id })!
+                    nodes[idx] = node
+                }
+            }
+        }
     }
 
     static func tree(from nodes: [LayoutNode]) -> [[LayoutNodeSiblings]] {

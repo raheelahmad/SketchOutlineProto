@@ -68,6 +68,23 @@ final class AutoLayoutTests: XCTestCase {
         )
     }
 
+    func testLayout() {
+        var nodes: [LayoutNode] = self.nodes()
+        NodesAutoLayout.layout(
+            nodes: &nodes,
+            m: NodesAutoLayout.Metrics(
+                nodeSize: .init(width: 0.1, height: 0.02),
+                nodeSpacingX: 0.02,
+                nodeSpacingY: 0.05,
+                interSiblingsSpacing: 0.04,
+                rowSpacing: 0.1
+            )
+        )
+        for node in nodes {
+            print(node.fractPos)
+        }
+    }
+
     struct Node: LayoutNode {
         let id: String
         let childNodeIds: Set<String>
