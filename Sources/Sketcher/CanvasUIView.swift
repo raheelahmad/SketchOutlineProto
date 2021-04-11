@@ -27,7 +27,7 @@ struct TextUpdate {
 }
 
 public final class CanvasUIView: UIView {
-    private let model: CanvasViewModel
+//    private let model: CanvasViewModel
     var currentLine: Line? = nil {
         didSet {
             setNeedsDisplay()
@@ -64,7 +64,7 @@ public final class CanvasUIView: UIView {
     private var cancellables: [AnyCancellable] = []
 
     init(model: CanvasViewModel) {
-        self.model = model
+//        self.model = model
         super.init(frame: .zero)
 
         addGestureRecognizer(nodeRecognizer)
@@ -165,6 +165,7 @@ extension CanvasUIView {
             }
         }
 
+        #warning("Not needed?")
         setNeedsDisplay()
     }
 }
@@ -200,7 +201,6 @@ extension CanvasUIView {
             x: bounds.width * CGFloat(node.fractPos.x),
             y: bounds.height * CGFloat(node.fractPos.y)
         )
-        print("\(node.title) at \(view.center)")
 
         let color = UInt(node.colorHex, radix: 16).map { UIColor.hex($0) }
 

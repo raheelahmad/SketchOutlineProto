@@ -7,6 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5921C62A2622C19200EA167D /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5921C6292622C19200EA167D /* AppDelegate.swift */; };
+		5921C62C2622C19200EA167D /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5921C62B2622C19200EA167D /* SceneDelegate.swift */; };
+		5921C62E2622C19200EA167D /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5921C62D2622C19200EA167D /* ContentView.swift */; };
+		5921C6302622C19400EA167D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5921C62F2622C19400EA167D /* Assets.xcassets */; };
+		5921C6332622C19400EA167D /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5921C6322622C19400EA167D /* Preview Assets.xcassets */; };
+		5921C6362622C19400EA167D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5921C6342622C19400EA167D /* LaunchScreen.storyboard */; };
+		5921C63F2622C1BC00EA167D /* NodeView in Frameworks */ = {isa = PBXBuildFile; productRef = 5921C63E2622C1BC00EA167D /* NodeView */; };
+		5921C6412622C1BC00EA167D /* Sketcher in Frameworks */ = {isa = PBXBuildFile; productRef = 5921C6402622C1BC00EA167D /* Sketcher */; };
+		5921C6432622C1BC00EA167D /* SketchStatusView in Frameworks */ = {isa = PBXBuildFile; productRef = 5921C6422622C1BC00EA167D /* SketchStatusView */; };
+		5921C6452622C1BC00EA167D /* Style in Frameworks */ = {isa = PBXBuildFile; productRef = 5921C6442622C1BC00EA167D /* Style */; };
+		5921C64D2622C1F700EA167D /* Models in Frameworks */ = {isa = PBXBuildFile; productRef = 5921C64C2622C1F700EA167D /* Models */; };
 		592879EC2606F77E00FA0AAC /* AppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592879EB2606F77E00FA0AAC /* AppApp.swift */; };
 		592879EE2606F77E00FA0AAC /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 592879ED2606F77E00FA0AAC /* ContentView.swift */; };
 		592879F02606F78000FA0AAC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 592879EF2606F78000FA0AAC /* Assets.xcassets */; };
@@ -23,6 +34,14 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		5921C6272622C19200EA167D /* SketchApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SketchApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5921C6292622C19200EA167D /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		5921C62B2622C19200EA167D /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		5921C62D2622C19200EA167D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5921C62F2622C19400EA167D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		5921C6322622C19400EA167D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		5921C6352622C19400EA167D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		5921C6372622C19400EA167D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		592879E82606F77E00FA0AAC /* SketchProto.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SketchProto.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		592879EB2606F77E00FA0AAC /* AppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppApp.swift; sourceTree = "<group>"; };
 		592879ED2606F77E00FA0AAC /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -39,6 +58,18 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		5921C6242622C19200EA167D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5921C64D2622C1F700EA167D /* Models in Frameworks */,
+				5921C63F2622C1BC00EA167D /* NodeView in Frameworks */,
+				5921C6432622C1BC00EA167D /* SketchStatusView in Frameworks */,
+				5921C6452622C1BC00EA167D /* Style in Frameworks */,
+				5921C6412622C1BC00EA167D /* Sketcher in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		592879E52606F77E00FA0AAC /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -60,9 +91,32 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		5921C6282622C19200EA167D /* SketchApp */ = {
+			isa = PBXGroup;
+			children = (
+				5921C6292622C19200EA167D /* AppDelegate.swift */,
+				5921C62B2622C19200EA167D /* SceneDelegate.swift */,
+				5921C62D2622C19200EA167D /* ContentView.swift */,
+				5921C62F2622C19400EA167D /* Assets.xcassets */,
+				5921C6342622C19400EA167D /* LaunchScreen.storyboard */,
+				5921C6372622C19400EA167D /* Info.plist */,
+				5921C6312622C19400EA167D /* Preview Content */,
+			);
+			path = SketchApp;
+			sourceTree = "<group>";
+		};
+		5921C6312622C19400EA167D /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				5921C6322622C19400EA167D /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
 		592879DF2606F77E00FA0AAC = {
 			isa = PBXGroup;
 			children = (
+				5921C6282622C19200EA167D /* SketchApp */,
 				592879EA2606F77E00FA0AAC /* App */,
 				59C21F2826097A8100511477 /* SketchDemo */,
 				592879E92606F77E00FA0AAC /* Products */,
@@ -75,6 +129,7 @@
 			children = (
 				592879E82606F77E00FA0AAC /* SketchProto.app */,
 				59C21F2726097A8100511477 /* SketchDemo.app */,
+				5921C6272622C19200EA167D /* SketchApp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,6 +185,30 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		5921C6262622C19200EA167D /* SketchApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5921C63A2622C19400EA167D /* Build configuration list for PBXNativeTarget "SketchApp" */;
+			buildPhases = (
+				5921C6232622C19200EA167D /* Sources */,
+				5921C6242622C19200EA167D /* Frameworks */,
+				5921C6252622C19200EA167D /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SketchApp;
+			packageProductDependencies = (
+				5921C63E2622C1BC00EA167D /* NodeView */,
+				5921C6402622C1BC00EA167D /* Sketcher */,
+				5921C6422622C1BC00EA167D /* SketchStatusView */,
+				5921C6442622C1BC00EA167D /* Style */,
+				5921C64C2622C1F700EA167D /* Models */,
+			);
+			productName = SketchApp;
+			productReference = 5921C6272622C19200EA167D /* SketchApp.app */;
+			productType = "com.apple.product-type.application";
+		};
 		592879E72606F77E00FA0AAC /* SketchProto */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 592879F72606F78000FA0AAC /* Build configuration list for PBXNativeTarget "SketchProto" */;
@@ -181,6 +260,9 @@
 				LastSwiftUpdateCheck = 1240;
 				LastUpgradeCheck = 1240;
 				TargetAttributes = {
+					5921C6262622C19200EA167D = {
+						CreatedOnToolsVersion = 12.4;
+					};
 					592879E72606F77E00FA0AAC = {
 						CreatedOnToolsVersion = 12.4;
 					};
@@ -202,6 +284,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
+				5921C6262622C19200EA167D /* SketchApp */,
 				592879E72606F77E00FA0AAC /* SketchProto */,
 				59C21F2626097A8100511477 /* SketchDemo */,
 			);
@@ -209,6 +292,16 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		5921C6252622C19200EA167D /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5921C6362622C19400EA167D /* LaunchScreen.storyboard in Resources */,
+				5921C6332622C19400EA167D /* Preview Assets.xcassets in Resources */,
+				5921C6302622C19400EA167D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		592879E62606F77E00FA0AAC /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -230,6 +323,16 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		5921C6232622C19200EA167D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5921C62A2622C19200EA167D /* AppDelegate.swift in Sources */,
+				5921C62C2622C19200EA167D /* SceneDelegate.swift in Sources */,
+				5921C62E2622C19200EA167D /* ContentView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		592879E42606F77E00FA0AAC /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -251,7 +354,60 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXVariantGroup section */
+		5921C6342622C19400EA167D /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				5921C6352622C19400EA167D /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
 /* Begin XCBuildConfiguration section */
+		5921C6382622C19400EA167D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"SketchApp/Preview Content\"";
+				DEVELOPMENT_TEAM = 2W72Q4758S;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = SketchApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakunlabs.SketchApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5921C6392622C19400EA167D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_ASSET_PATHS = "\"SketchApp/Preview Content\"";
+				DEVELOPMENT_TEAM = 2W72Q4758S;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = SketchApp/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.sakunlabs.SketchApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		592879F52606F78000FA0AAC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -457,6 +613,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		5921C63A2622C19400EA167D /* Build configuration list for PBXNativeTarget "SketchApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5921C6382622C19400EA167D /* Debug */,
+				5921C6392622C19400EA167D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		592879E32606F77E00FA0AAC /* Build configuration list for PBXProject "SketchProto" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -487,6 +652,26 @@
 /* End XCConfigurationList section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		5921C63E2622C1BC00EA167D /* NodeView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = NodeView;
+		};
+		5921C6402622C1BC00EA167D /* Sketcher */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Sketcher;
+		};
+		5921C6422622C1BC00EA167D /* SketchStatusView */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SketchStatusView;
+		};
+		5921C6442622C1BC00EA167D /* Style */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Style;
+		};
+		5921C64C2622C1F700EA167D /* Models */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = Models;
+		};
 		59287A03260711C700FA0AAC /* SketchStatusView */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = SketchStatusView;

@@ -12,6 +12,7 @@ let package = Package(
         .library(name: "Style", targets: ["Style"]),
         .library(name: "Sketcher", targets: ["Sketcher"]),
         .library(name: "NodeView", targets: ["NodeView"]),
+        .library(name: "Models", targets: ["Models"]),
     ],
     dependencies: [
         // Dependencies declare other packages that this package depends on.

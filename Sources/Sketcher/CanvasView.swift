@@ -86,14 +86,6 @@ public final class CanvasViewModel: ObservableObject {
 
     public init() {
 
-        $autolayout
-            .sink { [weak self] autoLayout in
-                guard autoLayout, let self = self else { return }
-                NodesAutoLayout.layout(
-                    nodes: &self.nodes,
-                    m: NodesAutoLayout.Metrics(nodeSize: CGSize(width: 0.12, height: 0.1), nodeSpacingX: 0.01, nodeSpacingY: 0.02, interSiblingsSpacing: 0.01, rowSpacing: 0.01)
-                )
-            }.store(in: &cancellables)
     }
 }
 
