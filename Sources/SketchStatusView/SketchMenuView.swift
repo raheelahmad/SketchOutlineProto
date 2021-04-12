@@ -42,18 +42,13 @@ public struct SketchMenuView: View {
     public var body: some View {
         HStack(spacing: M.Sp.X.small) {
             ForEach(items) { item in
+                Button(action: {
+                    active = active == item ? nil : item
+                }) {
                 Image(systemName: item.imageName)
-                    .animation(.easeIn(duration: 0.3))
+                    .animation(.easeIn(duration: 0.1))
                     .foregroundColor(Color.blueMed)
-                    .scaleEffect(item == active ? 0.84 : 1.0)
-                    .onTapGesture {
-                        withAnimation {
-                            active = active == item ? nil : item
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                active = active == item ? nil : item
-                            }
-                        }
-                    }
+                }
             }
         }
         .padding([.leading, .trailing], M.Sp.X.small)

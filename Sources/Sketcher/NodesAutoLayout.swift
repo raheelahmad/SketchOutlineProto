@@ -25,13 +25,16 @@ class NodesAutoLayout {
 
         let rowSpacing: CGFloat
 
+        let margins: CGSize
     }
 
     static func layout(nodes: inout [Node], m: Metrics) {
         var tree = self.tree(from: nodes)
 
-        var x: CGFloat = m.nodeSize.width / 2.0
-        var y: CGFloat = 1 - m.nodeSize.height/2
+        let left: CGFloat = m.margins.width + m.nodeSize.width / 2.0
+        let bottom: CGFloat = 1 - m.nodeSize.height/2 - m.margins.height
+        var x: CGFloat = left
+        var y: CGFloat = bottom
 
         for (levelIdx, var level) in tree.enumerated().reversed() {
             for (groupIdx, var siblingGroup) in level.enumerated() {
@@ -47,7 +50,7 @@ class NodesAutoLayout {
             }
 
             y -= (m.nodeSize.height + m.rowSpacing)
-            x = m.nodeSize.width / 2.0
+            x = left
             tree[levelIdx] = level
         }
 

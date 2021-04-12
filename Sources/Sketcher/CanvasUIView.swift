@@ -88,6 +88,7 @@ public final class CanvasUIView: UIView {
             } else {
                 linkRecognized.send(.onlyFrom(fromNodeId: from.id, to: line.points.last!))
             }
+            setNeedsDisplay()
         default:
             setNeedsDisplay()
         }
@@ -99,6 +100,7 @@ public final class CanvasUIView: UIView {
         case .recognized:
             if let rect = recognizer.line?.boundingRect {
                 nodeRecognized.send(NodeRecognition(center: CGPoint(x: rect.midX, y: rect.midY)))
+                setNeedsDisplay()
             }
         default:
             setNeedsDisplay()
@@ -163,9 +165,6 @@ extension CanvasUIView {
                 linkLayer.updateLinkPath(from: from, to: to)
             }
         }
-
-        #warning("Not needed?")
-        setNeedsDisplay()
     }
 }
 
