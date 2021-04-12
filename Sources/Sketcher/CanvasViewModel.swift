@@ -4,7 +4,7 @@ import Combine
 
 import Models
 
-final class CanvasModel {
+final class CanvasViewModel {
     let nodes: CurrentValueSubject<[Node], Never>
 
     private static let nodesStorageKey = "Nodes"
@@ -100,7 +100,7 @@ final class CanvasModel {
     }
 }
 
-extension CanvasModel {
+extension CanvasViewModel {
     private func save() {
         do { try Self.write(self.nodes.value) }
         catch { assertionFailure("Error saving \(error.localizedDescription)") }

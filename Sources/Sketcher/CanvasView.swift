@@ -9,6 +9,7 @@ import SwiftUI
 import Models
 import Combine
 
+/*
 public final class Coordinator {
     private var cancellables: [AnyCancellable] = []
     private let view: CanvasView
@@ -116,4 +117,5 @@ struct SwiftUIView_Previews: PreviewProvider {
         CanvasView(model: CanvasViewModel())
     }
 }
+*/
 

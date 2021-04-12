@@ -16,8 +16,7 @@ public final class CanvasViewController: UIViewController {
 
     private let boundsUpdated = PassthroughSubject<CGRect, Never>()
 
-    #warning("REmove View Model")
-    lazy var canvasView = CanvasUIView(model: CanvasViewModel())
+    lazy var canvasView = CanvasUIView()
 
     lazy var menuView = UIHostingController(rootView: SketchStatusView.SketchMenuView(items: [.init(title: "Auto layout", imageName: "perspective")]) { [weak self] selection in
         guard let self = self else { return }
@@ -31,7 +30,7 @@ public final class CanvasViewController: UIViewController {
         self.viewModel.autoLayout.send(metrics)
     })
 
-    private lazy var viewModel = CanvasModel(
+    private lazy var viewModel = CanvasViewModel(
         nodeRecognized: canvasView.nodeRecognized.eraseToAnyPublisher(),
         linkRecognized: canvasView.linkRecognized.eraseToAnyPublisher(),
         textUpdated: canvasView.textUpdated.eraseToAnyPublisher(),

@@ -63,8 +63,7 @@ public final class CanvasUIView: UIView {
 
     private var cancellables: [AnyCancellable] = []
 
-    init(model: CanvasViewModel) {
-//        self.model = model
+    init() {
         super.init(frame: .zero)
 
         addGestureRecognizer(nodeRecognizer)
